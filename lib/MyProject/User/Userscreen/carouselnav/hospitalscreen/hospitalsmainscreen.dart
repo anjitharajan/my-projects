@@ -14,13 +14,13 @@ class HospitalPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> services = [
-      {"name": "Rooms", "icon": ""},
-      {"name": "Request", "icon": ""},
-      {"name": "map", "icon": ""},
-      {"name": "Diet", "icon": ""},
-      {"name": "report", "icon": ""},
-      {"name": "Emergency", "icon": ""},
+    final List<Map<String, dynamic>> services = [
+      {"name": "Rooms", "icon": Icons.hotel},
+      {"name": "Request", "icon": Icons.request_page},
+      {"name": "Map", "icon": Icons.map},
+      {"name": "Diet", "icon": Icons.restaurant},
+      {"name": "Report", "icon": Icons.folder},
+      {"name": "Emergency", "icon": Icons.local_hospital},
     ];
 
     return Scaffold(

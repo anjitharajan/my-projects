@@ -1,0 +1,309 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:virmedo/MyProject/Admin/Homepage/adminhome.dart';
+import 'package:virmedo/MyProject/Doctor/Doctorhome/doctorhome.dart';
+import 'package:virmedo/MyProject/Hospital/Hospitalhome/hospitalhome.dart';
+import 'package:virmedo/MyProject/User/Userscreen/home/userdashb.dart';
+import 'package:virmedo/MyProject/signup/bloc/loginbloc_bloc.dart';
+import 'package:virmedo/MyProject/signup/bloc/loginbloc_event.dart';
+import 'package:virmedo/MyProject/signup/bloc/loginbloc_state.dart';
+import 'package:virmedo/MyProject/signup/signupscreen/signupscreen.dart';
+
+class LoginPage extends StatefulWidget {
+  LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController emailOrCodeController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  String selectedRole = "Patient";
+
+  @override
+  Widget build(BuildContext context) {
+    final gradientColors = [Colors.blue, Color.fromARGB(255, 4, 46, 81)];
+
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: BlocConsumer<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthFailure) {
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(state.error)));
+            }
+
+            if (state is AuthSuccess) {
+              final user = state.user;
+              final role = user.role;
+
+              if (role == "Admin") {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => AdminDashboard()),
+                );
+              } else if (role == "Hospital") {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => HospitalMainPage(
+                      hospitalId: user.id ?? '',
+                      hospitalName: user.name ?? 'Hospital',
+                      hospitalImage: user.image ?? '',
+                      aboutText: user.address ?? 'No details available',
+                    ),
+                  ),
+                );
+              }else if (role == "Doctor") {
+ Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (_) => DoctorAppointmentsPage(
+      doctorId: user.id ?? '',
+      doctorName: user.name ?? 'Doctor',
+      hospitalId: user.hospitalId ?? '',  // <- pass hospitalId here
+    ),
+  ),
+);
+
+}
+
+else if (role == "Patient") {
+  Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (_) => Userdashboard(
+      userId: user.id ?? '',
+      userName: user.name ?? 'User',
+    ),
+  ),
+);
+}
+ else {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Unknown role: $role")));
+              }
+            }
+          },
+
+          builder: (context, state) {
+            return Center(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.all(28.0),
+                  child: Container(
+                    padding: EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(25),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 15,
+                          offset: Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(height: 8),
+                        Text(
+                          "Login to your account",
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 4, 46, 81),
+                          ),
+                        ),
+                        SizedBox(height: 30),
+
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(15),
+                            border: Border.all(
+                              color: Color.fromARGB(255, 4, 46, 81),
+                            ),
+                          ),
+                          child: DropdownButton<String>(
+                            value: selectedRole,
+                            isExpanded: true,
+                            dropdownColor: const Color.fromARGB(255, 4, 46, 81),
+                            underline: SizedBox(),
+                            icon: Icon(Icons.arrow_drop_down),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            onChanged: (val) =>
+                                setState(() => selectedRole = val!),
+                            items: const [
+                              DropdownMenuItem(
+                                value: "Admin",
+                                child: Text(
+                                  "Admin",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: "Hospital",
+                                child: Text(
+                                  "Hospital",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: "Doctor",
+                                child: Text(
+                                  "Doctor",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                              DropdownMenuItem(
+                                value: "Patient",
+                                child: Text(
+                                  "User",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 16),
+
+                        TextField(
+                          controller: emailOrCodeController,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              selectedRole == "Hospital"
+                                  ? Icons.local_hospital
+                                  : Icons.email,
+                              color: gradientColors[1],
+                            ),
+                            labelText: selectedRole == "Hospital"
+                                ? "Hospital Code"
+                                : "Email",
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+
+                        TextField(
+                          controller: passwordController,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            prefixIcon: Icon(
+                              Icons.lock,
+                              color: gradientColors[1],
+                            ),
+                            labelText: "Password",
+                            filled: true,
+                            fillColor: Colors.grey.shade100,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(15),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 30),
+
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 35,
+                            ),
+
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 11,
+                            shadowColor: Colors.black,
+                          ),
+                          onPressed: state is AuthLoading
+                              ? null
+                              : () {
+                                  final emailOrCode = emailOrCodeController.text
+                                      .trim();
+                                  final password = passwordController.text
+                                      .trim();
+
+                                  if (emailOrCode.isEmpty || password.isEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Please fill all fields"),
+                                      ),
+                                    );
+                                    return;
+                                  }
+
+                                  BlocProvider.of<AuthBloc>(context).add(
+                                    LoginEvent(
+                                      emailOrCode: emailOrCode,
+                                      password: password,
+                                      role: selectedRole,
+                                    ),
+                                  );
+                                },
+                          child: state is AuthLoading
+                              ? CircularProgressIndicator(color: Colors.white)
+                              : Text(
+                                  "Login",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                        SizedBox(height: 16),
+
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SignUpScreen(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Don't have an account? Sign Up",
+                            style: TextStyle(
+                              color: gradientColors[1],
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}

@@ -7,6 +7,13 @@ class UserModel {
   final String? address;
   final String? adminCode;
   final String? image;
+  final String? code;
+  final String? contact;
+  final String? createdAt;
+  final bool? linked; 
+  final String? authUid; 
+    final String? hospitalId;
+  final String? hospitalName;
 
   UserModel({
     this.id,
@@ -17,6 +24,13 @@ class UserModel {
     this.address,
     this.adminCode,
     this.image,
+    this.code,
+    this.contact,
+    this.createdAt,
+    this.linked,
+    this.authUid,
+    this.hospitalId,     
+    this.hospitalName, 
   });
 
   Map<String, dynamic> toMap() {
@@ -29,6 +43,13 @@ class UserModel {
       "address": address,
       "adminCode": adminCode,
       "image": image,
+      "code": code,
+      "contact": contact,
+      "createdAt": createdAt,
+      "linked": linked,
+      "authUid": authUid,
+      "hospitalId": hospitalId,       
+      "hospitalName": hospitalName, 
     };
   }
 
@@ -38,10 +59,19 @@ class UserModel {
       name: map["name"],
       email: map["email"],
       password: map["password"],
-      role: map["role"],
+      role: map["role"] ?? "Patient",
       address: map["address"],
       adminCode: map["adminCode"],
       image: map["image"],
+        code: map["code"],
+      contact: map["contact"],
+      createdAt: map["createdAt"],
+      linked: map["linked"],
+      authUid: map["authUid"],
+        hospitalId: map["hospitalId"],       
+      hospitalName: map["hospitalName"], 
     );
   }
+
+ 
 }

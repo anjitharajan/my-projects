@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:virmedo/MyProject/Admin/Homepage/adminhome.dart';
+import 'package:virmedo/MyProject/Doctor/Doctorhome/doctorhome.dart';
 import 'package:virmedo/MyProject/Hospital/Hospitalhome/hospitalhome.dart';
 import 'package:virmedo/MyProject/User/Userscreen/home/userdashb.dart';
 import 'package:virmedo/MyProject/signup/bloc/loginbloc_bloc.dart';
@@ -77,12 +78,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
               );
-            } else {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => Userdashboard()),
-              );
-            }
+            }else if (user.role == "Doctor") {
+Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (_) => DoctorAppointmentsPage(
+      doctorId: user.id ?? '',
+      doctorName: user.name ?? 'Doctor',
+      hospitalId: user.hospitalId ?? '',  // <- pass hospitalId here
+    ),
+  ),
+);
+
+}
+else {
+ Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (_) => Userdashboard(
+      userId: user.id ?? '',
+      userName: user.name ?? 'User',
+    ),
+  ),
+);
+}
+
           } else if (state is AuthFailure) {
             print("SIGNUP ERROR: ${state.error}");
             ScaffoldMessenger.of(
@@ -120,7 +140,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             fontWeight: FontWeight.w500,
                             fontSize: 16,
                           ),
-                          items: ['Patient', 'Hospital', 'Admin']
+                          items: ['Patient', 'Doctor', 'Hospital', 'Admin']
                               .map(
                                 (role) => DropdownMenuItem(
                                   value: role,
@@ -150,149 +170,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
 
-                        // if (_role != 'Admin')
-                        //   Padding(
-                        //     padding:  EdgeInsets.symmetric(vertical: 10.0),
-                        //     child: TextFormField(
-                        //       controller: _name,
-                        //       decoration: InputDecoration(
-                        //         labelText: "Name",
-                        //         labelStyle: TextStyle(
-                        //           color:  Color.fromARGB(255, 4, 46, 81),
-                        //         ),
-                        //        border: OutlineInputBorder(
-                        //         borderSide: BorderSide(color: Colors.black),
-                        //       ),
-                        //       focusedBorder: OutlineInputBorder(
-                        //         borderRadius: BorderRadius.circular(12),
-                        //         borderSide:  BorderSide(
-                        //           color: Colors.white,
-                        //         ),
-                        //       ),
-                        //       ),
-                        //       validator: (val) =>
-                        //           val!.isEmpty ? "Enter Name" : null,
-                        //     ),
-                        //   ),
-                        // if (_role == 'Hospital')
-                        //   Padding(
-                        //     padding:  EdgeInsets.symmetric(vertical: 10.0),
-                        //     child: TextFormField(
-                        //       controller: _address,
-                        //       decoration: InputDecoration(
-                        //         labelText: "Address",
-                        //         labelStyle: TextStyle(
-                        //           color: Color.fromARGB(255, 4, 46, 81),
-                        //         ),
-                        //         border: OutlineInputBorder(
-                        //         borderSide: BorderSide(color: Colors.black),
-                        //       ),
-                        //       focusedBorder: OutlineInputBorder(
-                        //         borderRadius: BorderRadius.circular(12),
-                        //         borderSide:  BorderSide(
-                        //           color: Colors.white,
-                        //         ),
-                        //       ),
-                        //       ),
-                        //       validator: (val) =>
-                        //           val!.isEmpty ? "Enter Address" : null,
-                        //     ),
-                        //   ),
-                        // if (_role == 'Admin')
-                        //   Padding(
-                        //     padding:  EdgeInsets.symmetric(vertical: 10.0),
-                        //     child: TextFormField(
-                        //       controller: _adminCode,
-                        //       decoration: InputDecoration(
-                        //         labelText: "Admin Code",
-                        //         labelStyle: TextStyle(
-                        //           color: Color.fromARGB(255, 4, 46, 81),
-                        //         ),
-                        //         border: OutlineInputBorder(
-                        //         borderSide: BorderSide(color: Colors.black),
-                        //       ),
-                        //       focusedBorder: OutlineInputBorder(
-                        //         borderRadius: BorderRadius.circular(12),
-                        //         borderSide:  BorderSide(
-                        //           color: Colors.white,
-                        //         ),
-                        //       ),
-                        //       ),
-                        //       validator: (val) =>
-                        //           val!.isEmpty ? "Enter Admin Code" : null,
-                        //     ),
-                        //   ),
-                        // Padding(
-                        //   padding:  EdgeInsets.symmetric(vertical: 10.0),
-                        //   child: TextFormField(
-                        //     controller: _email,
-                        //     decoration: InputDecoration(
-                        //       labelText: "Email",
-                        //       labelStyle: TextStyle(
-                        //         color: Color.fromARGB(255, 4, 46, 81),
-                        //       ),
-                        //       border: OutlineInputBorder(
-                        //         borderSide: BorderSide(color: Colors.black),
-                        //       ),
-                        //       focusedBorder: OutlineInputBorder(
-                        //         borderRadius: BorderRadius.circular(12),
-                        //         borderSide:  BorderSide(
-                        //           color: Colors.white,
-                        //         ),
-                        //       ),
-                        //     ),
-                        //     validator: (val) =>
-                        //         val!.isEmpty ? "Enter Email" : null,
-                        //   ),
-                        // ),
-                        // Padding(
-                        //   padding:  EdgeInsets.symmetric(vertical: 10.0),
-                        //   child: TextFormField(
-                        //     controller: _password,
-                        //     decoration: InputDecoration(
-                        //       labelText: "Password",
-                        //       labelStyle: TextStyle(
-                        //         color: Color.fromARGB(255, 4, 46, 81),
-                        //       ),
-                        //       border: OutlineInputBorder(
-                        //         borderSide: BorderSide(color: Colors.black),
-                        //       ),
-                        //       focusedBorder: OutlineInputBorder(
-                        //         borderRadius: BorderRadius.circular(12),
-                        //         borderSide:  BorderSide(
-                        //           color: Colors.white,
-                        //         ),
-                        //       ),
-                        //     ),
-                        //     obscureText: true,
-                        //     validator: (val) =>
-                        //         val!.isEmpty ? "Enter Password" : null,
-                        //   ),
-                        // ),
-                        // SizedBox(height: 40),
-                        // ElevatedButton(
-                        //   style: ElevatedButton.styleFrom(
-                        //     backgroundColor:  Color.fromARGB(
-                        //       255,
-                        //       255,
-                        //       255,
-                        //       255,
-                        //     ), // Button background color
-                        //     // Text & icon color
-                        //     shape: RoundedRectangleBorder(
-                        //       borderRadius: BorderRadius.circular(
-                        //         10,
-                        //       ), // Rounded corners
-                        //     ),
-                        //     padding:  EdgeInsets.symmetric(
-                        //       horizontal: 30,
-                        //       vertical: 15,
-                        //     ),
-                        //     elevation: 5, // Add shadow
-                        //   ),
                         if (_role != 'Admin') _buildTextField(_name, "Name"),
-                        if (_role == 'Hospital')
-                          _buildTextField(_address, "Address"),
+                        if (_role == 'Hospital' || _role == 'Doctor')
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 10.0),
+                            child: TextFormField(
+                              controller: _adminCode,
+                              decoration: const InputDecoration(
+                                labelText: "Hospital Code",
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (val) => val == null || val.isEmpty
+                                  ? "Please enter your hospital code"
+                                  : null,
+                            ),
+                          ),
+
                         if (_role == 'Admin')
                           _buildTextField(_adminCode, "Admin Code"),
                         _buildTextField(_email, "Email"),
