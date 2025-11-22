@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:virmedo/MyProject/Admin/Homepage/adminhome.dart';
-import 'package:virmedo/MyProject/Doctor/Doctorhome/doctorhome.dart';
 import 'package:virmedo/MyProject/Hospital/Hospitalhome/hospitalhome.dart';
 import 'package:virmedo/MyProject/User/Userscreen/home/userdashb.dart';
 import 'package:virmedo/MyProject/signup/bloc/loginbloc_bloc.dart';
 import 'package:virmedo/MyProject/signup/bloc/loginbloc_event.dart';
 import 'package:virmedo/MyProject/signup/bloc/loginbloc_state.dart';
+import 'package:virmedo/MyProject/signup/login/loginpage.dart';
 import 'package:virmedo/MyProject/signup/modelclass/signupmodelclass.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -22,7 +23,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _address = TextEditingController();
   final TextEditingController _adminCode = TextEditingController();
 
-  String _role = 'Patient';
+  String _role = 'User';
 
   @override
   void dispose() {
@@ -44,7 +45,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         title: Center(
           child: Text(
             "Sign Up",
-            style: TextStyle(
+            style: GoogleFonts.dmSerifText(
               fontSize: 29,
               color: Color.fromARGB(255, 4, 46, 81),
               fontWeight: FontWeight.bold,
@@ -75,34 +76,35 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     hospitalImage:
                         user.image ?? 'https://via.placeholder.com/400',
                     aboutText: user.address ?? 'No details available',
+                    userId: user.id ?? '',
                   ),
                 ),
               );
-            }else if (user.role == "Doctor") {
-Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (_) => DoctorAppointmentsPage(
-      doctorId: user.id ?? '',
-      doctorName: user.name ?? 'Doctor',
-      hospitalId: user.hospitalId ?? '',  // <- pass hospitalId here
-    ),
-  ),
-);
-
-}
-else {
- Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (_) => Userdashboard(
-      userId: user.id ?? '',
-      userName: user.name ?? 'User',
-    ),
-  ),
-);
-}
-
+            }
+            //  else if (user.role == "Doctor") {
+            //   Navigator.pushReplacement(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (_) => DoctorAppointmentsPage(
+            //         doctorId: user.id ?? '',
+            //         doctorName: user.name ?? 'Doctor',
+            //         hospitalId:
+            //             user.hospitalId ?? '', // <- pass hospitalId here
+            //       ),
+            //     ),
+            //   );
+            // }
+            else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => Userdashboard(
+                    userId: user.id ?? '',
+                    userName: user.name ?? 'User',
+                  ),
+                ),
+              );
+            }
           } else if (state is AuthFailure) {
             print("SIGNUP ERROR: ${state.error}");
             ScaffoldMessenger.of(
@@ -117,7 +119,7 @@ else {
             child: Center(
               child: Container(
                 width: screenSize.width * 0.9,
-                height: screenSize.height * 0.8,
+                height: screenSize.height * 0.7,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [BoxShadow(color: Colors.black, blurRadius: 8)],
@@ -135,12 +137,12 @@ else {
                           value: _role,
                           dropdownColor: Color(0xFF0D47A1),
                           iconEnabledColor: Colors.white,
-                          style: TextStyle(
+                          style: GoogleFonts.almendra(
                             color: Colors.white,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
-                          items: ['Patient', 'Doctor', 'Hospital', 'Admin']
+                          items: ['User', 'Hospital', 'Admin']
                               .map(
                                 (role) => DropdownMenuItem(
                                   value: role,
@@ -155,7 +157,7 @@ else {
                           },
                           decoration: InputDecoration(
                             labelText: "Select Role",
-                            labelStyle: TextStyle(
+                            labelStyle: GoogleFonts.grenzeGotisch(
                               color: Color.fromARGB(255, 4, 46, 81),
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -171,13 +173,24 @@ else {
                         ),
 
                         if (_role != 'Admin') _buildTextField(_name, "Name"),
-                        if (_role == 'Hospital' || _role == 'Doctor')
+                        if (_role == 'Hospital')
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10.0),
                             child: TextFormField(
                               controller: _adminCode,
-                              decoration: const InputDecoration(
+                              style: GoogleFonts.grenzeGotisch(
+                                fontSize: 18,// font size for input text
+                                fontWeight: FontWeight.bold,//nt weight
+                                color: Color.fromARGB(255, 4, 46, 81),
+                              ),
+                              decoration:  InputDecoration(
                                 labelText: "Hospital Code",
+                                labelStyle: GoogleFonts.grenzeGotisch(
+                                     color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                                ),
+
                                 border: OutlineInputBorder(),
                               ),
                               validator: (val) => val == null || val.isEmpty
@@ -221,10 +234,29 @@ else {
                           },
                           child: Text(
                             "Sign up",
-                            style: TextStyle(
+                            style: GoogleFonts.limelight(
                               color: Color.fromARGB(255, 4, 46, 81),
                               fontWeight: FontWeight.w500,
-                              fontSize: 17,
+                              fontSize: 19,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Please Login !...",
+                            style: GoogleFonts.agbalumo(
+                              fontSize: 15,
+                              color: Colors.white,
+                              //ontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -248,11 +280,19 @@ else {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 10.0),
       child: TextFormField(
+        style: GoogleFonts.grenzeGotisch(
+          fontSize: 18, //font size for input text
+          fontWeight: FontWeight.bold, //ont weight
+          color: Color.fromARGB(255, 4, 46, 81),
+        ),
         controller: controller,
         obscureText: obscure,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(color: Color.fromARGB(255, 4, 46, 81)),
+          labelStyle: GoogleFonts.grenzeGotisch(
+            color: Colors.white,
+            //ontWeight: FontWeight.bold,
+          ),
           border: OutlineInputBorder(),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

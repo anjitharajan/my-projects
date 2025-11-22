@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -74,7 +75,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         ),
         title: Text(
           "Edit Profile",
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: GoogleFonts.merriweather(
+            color: Colors.black, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
@@ -136,9 +138,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Container(
       margin: EdgeInsets.only(bottom: 15),
       child: TextField(
+        style:  GoogleFonts.germaniaOne(),
         controller: controller,
         decoration: InputDecoration(
           labelText: label,
+          labelStyle:  GoogleFonts.germaniaOne(),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(color: Colors.grey),
@@ -154,8 +158,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       margin: EdgeInsets.only(bottom: 15),
       child: TextField(
         obscureText: _obscurePassword,
+        style: GoogleFonts.germaniaOne(),
         decoration: InputDecoration(
           labelText: "Password",
+          labelStyle:  GoogleFonts.germaniaOne(),
           suffixIcon: IconButton(
             icon: Icon(
               _obscurePassword ? Icons.visibility_off : Icons.visibility,

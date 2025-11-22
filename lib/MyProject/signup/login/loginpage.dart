@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:virmedo/MyProject/Admin/Homepage/adminhome.dart';
 import 'package:virmedo/MyProject/Doctor/Doctorhome/doctorhome.dart';
 import 'package:virmedo/MyProject/Hospital/Hospitalhome/hospitalhome.dart';
@@ -19,7 +20,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailOrCodeController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  String selectedRole = "Patient";
+  String selectedRole = "User";
 
   @override
   Widget build(BuildContext context) {
@@ -60,35 +61,34 @@ class _LoginPageState extends State<LoginPage> {
                       hospitalName: user.name ?? 'Hospital',
                       hospitalImage: user.image ?? '',
                       aboutText: user.address ?? 'No details available',
+                      userId: user.id ?? '',
                     ),
                   ),
                 );
-              }else if (role == "Doctor") {
- Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (_) => DoctorAppointmentsPage(
-      doctorId: user.id ?? '',
-      doctorName: user.name ?? 'Doctor',
-      hospitalId: user.hospitalId ?? '',  // <- pass hospitalId here
-    ),
-  ),
-);
+              } else if (role == "Doctor") {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => DoctorAppointmentsPage(
+                      doctorId: user.doctorId ?? '',
 
-}
-
-else if (role == "Patient") {
-  Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (_) => Userdashboard(
-      userId: user.id ?? '',
-      userName: user.name ?? 'User',
-    ),
-  ),
-);
-}
- else {
+                      doctorName: user.name ?? 'Doctor',
+                      hospitalId:
+                          user.hospitalId ?? '', // <- pass hospitalId here
+                    ),
+                  ),
+                );
+              } else if (role == "User") {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => Userdashboard(
+                      userId: user.id ?? '',
+                      userName: user.name ?? 'User',
+                    ),
+                  ),
+                );
+              } else {
                 ScaffoldMessenger.of(
                   context,
                 ).showSnackBar(SnackBar(content: Text("Unknown role: $role")));
@@ -120,7 +120,7 @@ else if (role == "Patient") {
                         SizedBox(height: 8),
                         Text(
                           "Login to your account",
-                          style: TextStyle(
+                          style: GoogleFonts.dmSerifText(
                             fontSize: 30,
                             fontWeight: FontWeight.bold,
                             color: Color.fromARGB(255, 4, 46, 81),
@@ -134,19 +134,27 @@ else if (role == "Patient") {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(15),
-                            border: Border.all(
-                              color: Color.fromARGB(255, 4, 46, 81),
+                            gradient: LinearGradient(
+                              colors: [
+                                Color.fromARGB(255, 4, 46, 81),
+                                Colors.blue,
+                              ],
                             ),
+                            borderRadius: BorderRadius.circular(18),
+                            boxShadow: [
+                              BoxShadow(color: Colors.grey, blurRadius: 8),
+                            ],
                           ),
                           child: DropdownButton<String>(
                             value: selectedRole,
                             isExpanded: true,
-                            dropdownColor: const Color.fromARGB(255, 4, 46, 81),
+                            dropdownColor: Color(0xFF0D47A1),
                             underline: SizedBox(),
-                            icon: Icon(Icons.arrow_drop_down),
-                            style: const TextStyle(
+                            icon: Icon(
+                              Icons.arrow_drop_down,
+                              color: Colors.white,
+                            ),
+                            style: GoogleFonts.almendra(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -158,28 +166,28 @@ else if (role == "Patient") {
                                 value: "Admin",
                                 child: Text(
                                   "Admin",
-                                  style: TextStyle(color: Colors.white),
+                                  //style: TextStyle(color: Colors.white),
                                 ),
                               ),
                               DropdownMenuItem(
                                 value: "Hospital",
                                 child: Text(
                                   "Hospital",
-                                  style: TextStyle(color: Colors.white),
+                                  //  style: TextStyle(color: Colors.white),
                                 ),
                               ),
                               DropdownMenuItem(
                                 value: "Doctor",
                                 child: Text(
                                   "Doctor",
-                                  style: TextStyle(color: Colors.white),
+                                  //style: TextStyle(color: Colors.white),
                                 ),
                               ),
                               DropdownMenuItem(
-                                value: "Patient",
+                                value: "User",
                                 child: Text(
                                   "User",
-                                  style: TextStyle(color: Colors.white),
+                                  //tyle: TextStyle(color: Colors.white)
                                 ),
                               ),
                             ],
@@ -189,6 +197,11 @@ else if (role == "Patient") {
 
                         TextField(
                           controller: emailOrCodeController,
+                          style: GoogleFonts.grenzeGotisch(
+                            fontSize: 18, //font size for input text
+                            fontWeight: FontWeight.w600, //font weight
+                            color: Color.fromARGB(255, 4, 46, 81),
+                          ),
                           decoration: InputDecoration(
                             prefixIcon: Icon(
                               selectedRole == "Hospital"
@@ -199,6 +212,11 @@ else if (role == "Patient") {
                             labelText: selectedRole == "Hospital"
                                 ? "Hospital Code"
                                 : "Email",
+                            labelStyle: GoogleFonts.grenzeGotisch(
+                              color: Color.fromARGB(255, 4, 46, 81),
+                              fontWeight:
+                                  FontWeight.w500, // font weight for label
+                            ),
                             filled: true,
                             fillColor: Colors.grey.shade100,
                             border: OutlineInputBorder(
@@ -218,6 +236,11 @@ else if (role == "Patient") {
                               color: gradientColors[1],
                             ),
                             labelText: "Password",
+                            labelStyle: GoogleFonts.grenzeGotisch(
+                              color: Color.fromARGB(255, 4, 46, 81),
+                              fontWeight: FontWeight.w600,
+                            ),
+
                             filled: true,
                             fillColor: Colors.grey.shade100,
                             border: OutlineInputBorder(
@@ -270,7 +293,8 @@ else if (role == "Patient") {
                               ? CircularProgressIndicator(color: Colors.white)
                               : Text(
                                   "Login",
-                                  style: TextStyle(
+                                  style: GoogleFonts.limelight(
+                                    color: Color.fromARGB(255, 4, 46, 81),
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -288,8 +312,8 @@ else if (role == "Patient") {
                             );
                           },
                           child: Text(
-                            "Don't have an account? Sign Up",
-                            style: TextStyle(
+                            "Don't have an account? Sign Up !...",
+                            style: GoogleFonts.agbalumo(
                               color: gradientColors[1],
                               fontWeight: FontWeight.w600,
                             ),

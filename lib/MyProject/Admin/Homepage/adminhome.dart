@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:virmedo/MyProject/Admin/Bottomnavigation/page1.dart';
 import 'package:virmedo/MyProject/Admin/Bottomnavigation/page2.dart';
 import 'package:virmedo/MyProject/Admin/Bottomnavigation/page3.dart';
-import 'package:virmedo/MyProject/signup/signupscreen/signupscreen.dart';
+import 'package:virmedo/MyProject/signup/login/loginpage.dart';
 
 class AdminDashboard extends StatefulWidget {
   AdminDashboard({super.key});
@@ -31,7 +32,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ),
       child: ListTile(
         leading: Icon(icon, color: Colors.white),
-        title: Text(title, style: TextStyle(color: Colors.white)),
+        title: Text(title, style: GoogleFonts.gloock(
+          color: Colors.white)),
         onTap: () => _onNavTapped(index),
       ),
     );
@@ -43,26 +45,36 @@ class _AdminDashboardState extends State<AdminDashboard> {
     return Scaffold(
       body: isMobile ? _buildMobileView(context) : _buildDesktopView(context),
       bottomNavigationBar: isMobile
-          ? BottomNavigationBar(
-              currentIndex: _selectedIndex,
-              onTap: _onNavTapped,
-              selectedItemColor:  Color.fromARGB(255, 4, 46, 81),
-              unselectedItemColor: Colors.grey,
-              backgroundColor: Colors.white,
-              items:  [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.dashboard),
-                  label: 'Dashboard',
+          ? Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue, Color.fromARGB(255, 6, 33, 55)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                 ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.local_hospital),
-                  label: 'Hospitals',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.feedback),
-                  label: 'Feedback',
-                ),
-              ],
+              ),
+              child: BottomNavigationBar(
+                currentIndex: _selectedIndex,
+                onTap: _onNavTapped,
+                 selectedItemColor: Colors.white,      // white icon + label
+    unselectedItemColor:  Color.fromARGB(255, 185, 189, 194), 
+     elevation: 0,
+                backgroundColor: Colors.transparent,
+                items: [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.dashboard),
+                    label: 'Dashboard',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.local_hospital),
+                    label: 'Hospitals',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.feedback),
+                    label: 'Feedback',
+                  ),
+                ],
+              ),
             )
           : null,
       floatingActionButton: isMobile
@@ -70,15 +82,15 @@ class _AdminDashboardState extends State<AdminDashboard> {
               onPressed: () {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (context) => SignUpScreen()),
+                  MaterialPageRoute(builder: (context) => LoginPage()),
                   (route) => false,
                 );
               },
               backgroundColor: Colors.white,
-              icon:  Icon(Icons.logout, color: Colors.redAccent),
-              label:  Text(
+              icon: Icon(Icons.logout, color: Colors.redAccent),
+              label: Text(
                 "Logout",
-                style: TextStyle(
+                style:  GoogleFonts.germaniaOne(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.redAccent,
@@ -86,7 +98,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
             )
           : null,
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.miniEndFloat,
     );
   }
 
@@ -115,10 +127,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 padding: EdgeInsets.all(20),
                 child: Text(
                   "Admin Panel",
-                  style: TextStyle(
+                  style: GoogleFonts.dmSerifDisplay(
                     fontSize: 22,
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                 
                   ),
                 ),
               ),
@@ -132,33 +144,34 @@ class _AdminDashboardState extends State<AdminDashboard> {
               Container(
                 decoration: BoxDecoration(color: Colors.transparent),
                 child: ListTile(
-                  leading:  Icon(
+                  leading: Icon(
                     Icons.logout,
                     color: Colors.redAccent,
-                    size: 22,
+                    size: 24,
                   ),
-                  title:  Text(
+                  title: Text(
                     "Logout",
-                    style: TextStyle(
+                    style:  GoogleFonts.germaniaOne(
                       color: Colors.redAccent,
                       fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      fontSize: 18,
                     ),
                   ),
                   onTap: () {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(builder: (context) => SignUpScreen()),
+                      MaterialPageRoute(builder: (context) => LoginPage()),
                       (route) => false,
                     );
                   },
                 ),
               ),
-               Padding(
+              Padding(
                 padding: EdgeInsets.all(12),
                 child: Text(
                   "© 2025 VIRMEDO",
-                  style: TextStyle(color: Colors.white54, fontSize: 12),
+                  style: GoogleFonts.germaniaOne(
+                    color: Colors.white54, fontSize: 16),
                 ),
               ),
             ],
@@ -175,10 +188,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
         children: [
           Expanded(child: _pages[_selectedIndex]),
           Padding(
-            padding:  EdgeInsets.only(bottom: 12, top: 4, right: 390),
+            padding: EdgeInsets.only(bottom: 12, top: 4, right: 390),
             child: Text(
               "©2025 VIRMEDO",
-              style: TextStyle(
+              style:  GoogleFonts.germaniaOne(
                 color: Colors.grey[600],
                 fontSize: 12,
                 fontWeight: FontWeight.w500,

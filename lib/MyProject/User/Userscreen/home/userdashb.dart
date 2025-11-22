@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:virmedo/MyProject/User/Bottomnavigation/Booking/bookingpage.dart';
 import 'package:virmedo/MyProject/User/Bottomnavigation/account/accountpage.dart';
 import 'package:virmedo/MyProject/User/Bottomnavigation/dashhome/homepg.dart';
@@ -6,11 +7,7 @@ import 'package:virmedo/MyProject/User/Bottomnavigation/dashhome/homepg.dart';
 class Userdashboard extends StatefulWidget {
   final String userId;
   final String userName;
-   Userdashboard({
-    super.key,
-    required this.userId,
-    required this.userName,
-  });
+  Userdashboard({super.key, required this.userId, required this.userName});
 
   @override
   State<Userdashboard> createState() => __UserdashboardStateState();
@@ -19,10 +16,10 @@ class Userdashboard extends StatefulWidget {
 class __UserdashboardStateState extends State<Userdashboard> {
   int _currentIndex = 0;
   List<Map<String, String>> _appointments = [];
-  
+
   @override
   void initState() {
-    super.initState();  
+    super.initState();
   }
 
   void _updateAppointments(List<Map<String, String>> appointments) {
@@ -31,37 +28,43 @@ class __UserdashboardStateState extends State<Userdashboard> {
     });
   }
 
-   @override
+  @override
   Widget build(BuildContext context) {
-final List<Widget> pages = [
-  Homepage(userId: widget.userId, appointments: _appointments),
-  Bookingpage(
-  userId: widget.userId,
-  userName: widget.userName,
-  onBooked: (newAppointments) {
-    setState(() {
-      _appointments = newAppointments;
-    });
-  },
-),
+    final List<Widget> pages = [
+      Homepage(userId: widget.userId, appointments: _appointments),
+      Bookingpage(
+        userId: widget.userId,
+        userName: widget.userName,
+        onBooked: (newAppointments) {
+          setState(() {
+            _appointments = newAppointments;
+          });
+        },
+      ),
 
-  Accountpage(),
-];
-
-
-
+      Accountpage(),
+    ];
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: Color.fromARGB(255, 4, 46, 81).withOpacity(0.10),
+        elevation: 0,
         title: Text(
-         "Hello, ${widget.userName}!"
-,
-          style: TextStyle(
-            color: Color.fromARGB(255, 4, 46, 81),
+          "Hello, ${widget.userName}!",
+          style: GoogleFonts.merriweather(
+            color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 24,
+          ),
+        ),
+        iconTheme: IconThemeData(color: Colors.white), // white icons
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                  colors: [Color.fromARGB(255, 4, 46, 81),Colors.blue, ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
         ),
       ),
@@ -71,15 +74,26 @@ final List<Widget> pages = [
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
+            colors: [Color.fromARGB(255, 4, 46, 81),Colors.blue, ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
         child: BottomNavigationBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           currentIndex: _currentIndex,
-          selectedItemColor: Color.fromARGB(255, 4, 46, 81),
-          unselectedItemColor: Color.fromARGB(255, 124, 123, 123),
+          selectedItemColor: Colors.white,
+          unselectedItemColor: const Color.fromARGB(179, 175, 169, 169),
+            selectedLabelStyle: GoogleFonts.grenzeGotisch(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+  ),
+  unselectedLabelStyle: GoogleFonts.grenzeGotisch(
+    fontSize: 14,
+    fontWeight: FontWeight.w400,
+  ),
+          type: BottomNavigationBarType.fixed,
           onTap: (index) {
             setState(() => _currentIndex = index);
           },
@@ -96,118 +110,3 @@ final List<Widget> pages = [
     );
   }
 }
-  // Widget _buildBody() {
-  //   if (_upcomingAppointment != null) {
-  //     final apptDateTime = DateTime.parse(_upcomingAppointment!['dateTime']!);
-  //     if (apptDateTime.isBefore(DateTime.now())) {
-  //       _upcomingAppointment = null;
-  //     }
-  //   }
-
-  //   switch (_currentIndex) {
-  //     case 0:
-  //       return _upcomingAppointment != null
-  //           ? _buildAppointmentCard(
-  //               _upcomingAppointment!['doctorName']!,
-  //               _upcomingAppointment!['specialization']!,
-  //               _upcomingAppointment!['date']!,
-  //               _upcomingAppointment!['time']!,
-  //               _upcomingAppointment!['image']!,
-  //             )
-  //           : _buildNoAppointmentCard();
-  //     case 2:
-  //       return Accountpage();
-  //     default:
-  //       return SizedBox();
-  //   }
-  // }
-
-
-// Widget _buildAppointmentCard(
-//   String doctorName,
-//   String specialization,
-//   String date,
-//   String time,
-//   String image,
-// ) {
-//   return Container(
-//     padding: EdgeInsets.all(12),
-//     decoration: BoxDecoration(
-//       borderRadius: BorderRadius.circular(12),
-//       color: Colors.yellow,
-//       boxShadow: [
-//         BoxShadow(color: Colors.grey.shade300, blurRadius: 6, spreadRadius: 2),
-//       ],
-//     ),
-    // child: Row(
-    //   children: [
-    //     CircleAvatar(radius: 35, backgroundImage: NetworkImage(image)),
-    //     SizedBox(width: 15),
-    //     Expanded(
-    //       child: Column(
-    //         crossAxisAlignment: CrossAxisAlignment.start,
-    //         children: [
-    //           Text(
-    //             doctorName,
-    //             style: TextStyle(
-    //               fontSize: 18,
-    //               fontWeight: FontWeight.bold,
-    //               color: Colors.black87,
-    //             ),
-    //           ),
-    //           Text(specialization, style: TextStyle(color: Colors.grey[700])),
-    //           SizedBox(height: 6),
-    //           Text(
-    //             " $date   $time",
-    //             style: TextStyle(color: Colors.blueGrey[700]),
-    //           ),
-    //         ],
-    //       ),
-    //     ),
-    //   ],
-//     // ),
-//   );
-// }
-
-// Widget _buildNoAppointmentCard() {
-//   return Container(
-//     width: double.infinity,
-//     padding: EdgeInsets.symmetric(vertical: 18),
-//     decoration: BoxDecoration(
-//       gradient: LinearGradient(
-//         colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
-//       ),
-//       borderRadius: BorderRadius.circular(10),
-//       boxShadow: [
-//         BoxShadow(color: Colors.grey, blurRadius: 3, spreadRadius: 1),
-//       ],
-//     ),
-//     child: Center(
-//       child: Text(
-//         "No appointment booked yet",
-//         style: TextStyle(
-//           color: Colors.white,
-//           fontSize: 16,
-//           fontWeight: FontWeight.w500,
-//         ),
-//       ),
-//     ),
-//   );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

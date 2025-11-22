@@ -1,37 +1,74 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class MapScreen extends StatefulWidget {
+class UserMapScreen extends StatefulWidget {
   final String hospitalId;
-
-  MapScreen({super.key, required this.hospitalId});
+  const UserMapScreen({super.key, required this.hospitalId});
 
   @override
-  State<MapScreen> createState() => _MapScreenState();
+  State<UserMapScreen> createState() => _UserMapScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
-  final LatLng _hospitalLocation = LatLng(12.9716, 77.5946);
-  GoogleMapController? _controller;
+class _UserMapScreenState extends State<UserMapScreen> {
+  final DatabaseReference dbRef = FirebaseDatabase.instance.ref();
+  Map<String, String> floorMaps = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFloorMaps();
+  }
+
+  void _loadFloorMaps() {
+    dbRef.child("hospitals/${widget.hospitalId}/services/map").onValue.listen((event) {
+      final data = event.snapshot.value;
+      if (data != null && data is Map) {
+        setState(() {
+          floorMaps = data.map((key, value) => MapEntry(key, value['url'].toString()));
+        });
+      } else {
+        setState(() => floorMaps = {});
+      }
+    });
+  }
+
+  void _openFloorMap(String url) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          appBar: AppBar(title: const Text("Floor Map")),
+          body: Center(
+            child: InteractiveViewer(
+              child: Image.network(url),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Hospital Map")),
-      body: GoogleMap(
-        onMapCreated: (controller) => _controller = controller,
-        initialCameraPosition: CameraPosition(
-          target: _hospitalLocation,
-          zoom: 15,
-        ),
-        markers: {
-          Marker(
-            markerId: MarkerId("hospital"),
-            position: _hospitalLocation,
-            infoWindow: InfoWindow(title: "Hospital Location"),
-          ),
-        },
-      ),
+      appBar: AppBar(title: const Text("Hospital Floor Maps")),
+      body: floorMaps.isEmpty
+          ? const Center(child: Text("No floor maps uploaded yet."))
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: floorMaps.entries.map((entry) {
+                final floorName = entry.key;
+                final url = entry.value;
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 8),
+                  child: ListTile(
+                    title: Text(floorName),
+                    trailing: const Icon(Icons.open_in_new),
+                    onTap: () => _openFloorMap(url),
+                  ),
+                );
+              }).toList(),
+            ),
     );
   }
 }

@@ -1,8 +1,10 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart'; 
 
 class Page3 extends StatefulWidget {
-   Page3({super.key});
+  const Page3({super.key});
 
   @override
   State<Page3> createState() => _Page3State();
@@ -27,90 +29,165 @@ class _Page3State extends State<Page3> {
 
       data.forEach((hospitalId, hospitalData) {
         final hospital = Map<String, dynamic>.from(hospitalData);
-        if (hospital.containsKey("reviews")) {
-          final reviewList = Map<String, dynamic>.from(hospital["reviews"]);
-          reviewList.forEach((reviewId, reviewData) {
-            final review = Map<String, dynamic>.from(reviewData);
+
+        if (hospital.containsKey("feedback")) {
+          final feedbackMap = Map<String, dynamic>.from(hospital["feedback"]);
+
+          feedbackMap.forEach((fid, fdata) {
+            final fb = Map<String, dynamic>.from(fdata);
+
             loadedReviews.add({
-              "hospital": hospital["name"],
-              "rating": review["rating"],
-              "review": review["review"],
-              "reviewer": review["reviewer"],
+              "hospital": hospital["name"] ?? "Unknown Hospital",
+              "hospitalId": hospitalId,
+              "fid": fid,
+              "message": fb["message"] ?? "",
+              "date": fb["timestamp"] ?? "",
+              "status": fb["attended"] == true ? "Attended" : "Pending",
             });
           });
         }
       });
 
       setState(() {
+        reviews.clear();
+        reviews.addAll(loadedReviews);
       });
+    }
+  }
+
+  Future<void> markAsAttended(String hospitalId, String feedbackId) async {
+    await dbRef
+        .child("$hospitalId/feedback/$feedbackId")
+        .update({"attended": true});
+    fetchReviews(); // refresh the list
+  }
+
+  String formatDate(String timestamp) {
+    try {
+      final dt = DateTime.parse(timestamp);
+      return DateFormat('dd/MM/yyyy – hh:mm a').format(dt);
+    } catch (_) {
+      return timestamp;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:  EdgeInsets.all(24.0),
+      padding: const EdgeInsets.all(30.0),
       child: Container(
         decoration: BoxDecoration(
-          gradient:  LinearGradient(
+          gradient: const LinearGradient(
             colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
           ),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: Colors.black, blurRadius: 8)],
+          boxShadow: const [BoxShadow(color: Colors.black, blurRadius: 8)],
         ),
-        padding:  EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Text(
-              "Hospital Reviews",
-              style: TextStyle(
+            Text(
+              "Hospital Feedback",
+              style: GoogleFonts.merriweather(
                 fontSize: 24,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 20),
-
+            const SizedBox(height: 20),
             Container(height: 2, width: double.infinity, color: Colors.white24),
-
-             SizedBox(height: 20),
+            const SizedBox(height: 15),
             Expanded(
               child: reviews.isEmpty
-                  ?  Center(
+                  ? Center(
                       child: Text(
-                        "No reviews found.",
-                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                        "No feedback found.",
+                        style: GoogleFonts.gloock(
+                          color: Colors.white70,
+                          fontSize: 16,
+                        ),
                       ),
                     )
                   : ListView.builder(
                       itemCount: reviews.length,
                       itemBuilder: (context, index) {
-                        final review = reviews[index];
+                        final fb = reviews[index];
+
                         return Card(
-                          color: Colors.white.withOpacity(0.9),
-                          margin:  EdgeInsets.symmetric(vertical: 10),
+                          color: Colors.white.withOpacity(0.95),
+                          margin: const EdgeInsets.symmetric(vertical: 10),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.blue.shade700,
-                              child: Text(
-                                review['rating'].toString(),
-                                style:  TextStyle(color: Colors.white),
-                              ),
-                            ),
-                            title: Text(
-                              review['hospital'],
-                              style:  TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                              ),
-                            ),
-                            subtitle: Text(
-                              '"${review['review']}"\n— ${review['reviewer']}',
-                              style:  TextStyle(height: 1.4),
+                              borderRadius: BorderRadius.circular(12)),
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                
+                                Text(
+                                  fb["hospital"],
+                                  style: GoogleFonts.ibarraRealNova(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+
+                          
+                                Text(
+                                  fb["message"],
+                                  style: GoogleFonts.ibarraRealNova(
+                                    fontSize: 15,
+                                    height: 1.3,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+
+                      
+                                Text(
+                                  "Date: ${formatDate(fb["date"])}",
+                                  style: GoogleFonts.ibarraRealNova(
+                                    fontSize: 13,
+                                    color: Colors.black54,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+
+                            
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: fb["status"] == "Pending"
+                                            ? Colors.orange
+                                            : Colors.green,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        fb["status"],
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+
+                                    if (fb["status"] == "Pending")
+                                      ElevatedButton(
+                                        onPressed: () => markAsAttended(
+                                            fb["hospitalId"], fb["fid"]),
+                                        style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green),
+                                        child: const Text("Mark as Attended"),
+                                      ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         );

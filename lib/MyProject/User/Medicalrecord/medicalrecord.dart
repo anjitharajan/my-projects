@@ -1,124 +1,162 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'dart:io';
+import 'package:google_fonts/google_fonts.dart';
 
 class MedicalRecordPage extends StatelessWidget {
   final String userId;
-  const MedicalRecordPage({super.key, required this.userId});
+
+  const MedicalRecordPage({super.key, required this.userId,});
 
   @override
   Widget build(BuildContext context) {
-    final ref = FirebaseDatabase.instance.ref("Users/$userId/medicalRecords");
+    final ref = FirebaseDatabase.instance.ref("users/$userId/medicalRecord");
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
-        title: const Text("Medical Records"),
-        backgroundColor: const Color(0xFF043051),
-        elevation: 2,
         centerTitle: true,
+        elevation: 0,
+        title: Text(
+          "Medical Records",
+          style: GoogleFonts.nunito(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+          ),
+        ),
+        iconTheme: IconThemeData(color: Colors.white), // white icons
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color.fromARGB(255, 4, 46, 81), Colors.blue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
-      body: StreamBuilder(
+     body: StreamBuilder<DatabaseEvent>(
         stream: ref.onValue,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
           if (!snapshot.hasData || snapshot.data?.snapshot.value == null) {
             return const Center(
-              child: Text(
-                "No medical records found",
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
+              child: Text("No medical records found"),
             );
           }
 
-          final data =
-              Map<String, dynamic>.from(snapshot.data!.snapshot.value as Map);
-          final records = data.entries.toList()
-            ..sort((a, b) => b.value["timestamp"]
-                .toString()
-                .compareTo(a.value["timestamp"].toString())); // latest first
+          final raw = snapshot.data!.snapshot.value;
+
+          // Filter only Map entries (ignores old strings)
+          final recordsMap = <String, Map<String, dynamic>>{};
+          if (raw is Map) {
+            raw.forEach((key, value) {
+              if (value is Map) {
+                recordsMap[key] = Map<String, dynamic>.from(value);
+              }
+            });
+          }
+
+          final records = recordsMap.entries
+              .map((entry) {
+                final rec = Map<String, dynamic>.from(entry.value);
+                rec["recordId"] = entry.key;
+                return rec;
+              })
+              .toList()
+            ..sort((a, b) => b["date"].toString().compareTo(a["date"].toString()));
+
+          if (records.isEmpty) {
+            return const Center(
+              child: Text("No medical records found"),
+            );
+          }
 
           return ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.all(12),
             itemCount: records.length,
             itemBuilder: (context, index) {
-              final rec = Map<String, dynamic>.from(records[index].value);
+              final rec = records[index];
               final imageUrl = rec["imageUrl"] ?? "";
               final localImagePath = rec["imagePath"] ?? "";
-              final timestamp = rec["timestamp"] ?? "";
+              final date = rec["date"] ?? "";
 
-              return Container(
+              return Card(
                 margin: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
+                shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.withOpacity(0.15),
-                      spreadRadius: 2,
-                      blurRadius: 6,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
                 ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  leading: CircleAvatar(
-                    radius: 28,
-                    backgroundColor: const Color(0xFF043051).withOpacity(0.1),
-                    child: const Icon(
-                      Icons.local_hospital,
-                      color: Color(0xFF043051),
-                      size: 26,
+                elevation: 4,
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.blue,
+                        Color.fromARGB(255, 4, 46, 81), // Dark Blue
+                         // Light Blue
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  title: Text(
-                    rec["doctorName"] ?? "Unknown Doctor",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Color(0xFF043051),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
                     ),
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 6.0),
-                    child: Column(
+
+                    leading: CircleAvatar(
+                      radius: 28,
+                      backgroundColor: Colors.white.withOpacity(0.2),
+                      child: const Icon(
+                        Icons.local_hospital,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+                    ),
+
+                    title: Text(
+                      rec["doctorName"] ?? "Unknown Doctor",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        color: Colors.white,
+                      ),
+                    ),
+
+                    subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           rec["hospitalName"] ?? "Unknown Hospital",
                           style: const TextStyle(
                             fontSize: 14,
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white70,
                           ),
                         ),
                         const SizedBox(height: 4),
+
                         Text(
                           "Prescription: ${rec["prescription"] ?? "Not provided"}",
                           style: const TextStyle(
                             fontSize: 13,
-                            color: Colors.black54,
+                            color: Colors.white70,
                           ),
                         ),
                         const SizedBox(height: 4),
+
                         Text(
-                          "Date: ${timestamp.toString().split('T').first}",
+                          "Date: ${date.toString().split('T').first}",
                           style: const TextStyle(
                             fontSize: 12,
-                            color: Colors.grey,
+                            color: Colors.white60,
                           ),
                         ),
                       ],
                     ),
+
+                    trailing: _buildImagePreview(imageUrl, localImagePath),
                   ),
-                  trailing: _buildImagePreview(imageUrl, localImagePath),
                 ),
               );
             },
@@ -128,7 +166,6 @@ class MedicalRecordPage extends StatelessWidget {
     );
   }
 
-  /// Helper to show image (network or local)
   Widget _buildImagePreview(String imageUrl, String localImagePath) {
     if (imageUrl.isNotEmpty) {
       return ClipRRect(
@@ -138,11 +175,8 @@ class MedicalRecordPage extends StatelessWidget {
           width: 60,
           height: 60,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const Icon(
-            Icons.receipt_long,
-            color: Colors.grey,
-            size: 30,
-          ),
+          errorBuilder: (_, __, ___) =>
+              const Icon(Icons.receipt_long, color: Colors.grey, size: 30),
         ),
       );
     } else if (localImagePath.isNotEmpty && File(localImagePath).existsSync()) {

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:virmedo/MyProject/signup/login/loginpage.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import 'package:virmedo/MyProject/signup/signupscreen/signupscreen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -35,10 +37,10 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    Timer(const Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 5), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => LoginPage()),
+        MaterialPageRoute(builder: (_) => SignUpScreen()),
       );
     });
   }
@@ -64,22 +66,15 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Image.asset('assets/logo.jpg', width: 300, height: 150),
+
                     Text(
-                      "logo",
-                      style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.redAccent.shade700,
-                        letterSpacing: 3,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      "VIRMEDO",
-                      style: TextStyle(
+                      "Because every life matters.",
+                      style: GoogleFonts.quintessential(
                         color: Color.fromARGB(255, 8, 65, 112),
-                        fontSize: 30,
-                        fontWeight: FontWeight.w400,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        
                       ),
                     ),
                   ],

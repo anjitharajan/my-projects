@@ -1,20 +1,22 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 import 'package:virmedo/MyProject/Hospital/bottomnavigation/haccountpage.dart';
 import 'package:virmedo/MyProject/Hospital/bottomnavigation/hpatientpage.dart';
-import 'package:virmedo/MyProject/User/Userscreen/carouselnav/Modules/rooms.dart';
-import 'package:virmedo/MyProject/User/Userscreen/carouselnav/Modules/request.dart';
-import 'package:virmedo/MyProject/User/Userscreen/carouselnav/Modules/map.dart';
-import 'package:virmedo/MyProject/User/Userscreen/carouselnav/Modules/report.dart';
-import 'package:virmedo/MyProject/User/Userscreen/carouselnav/Modules/emergency.dart';
-import 'package:virmedo/MyProject/signup/signupscreen/signupscreen.dart';
+import 'package:virmedo/MyProject/Hospital/modules/emergency.dart';
+import 'package:virmedo/MyProject/Hospital/modules/feedback.dart';
+import 'package:virmedo/MyProject/Hospital/modules/map.dart';
+import 'package:virmedo/MyProject/Hospital/modules/report.dart';
+import 'package:virmedo/MyProject/Hospital/modules/request_page.dart';
+import 'package:virmedo/MyProject/Hospital/modules/room_service_page.dart';
 
 class HospitalMainPage extends StatefulWidget {
   final String hospitalId;
   final String hospitalName;
   final String hospitalImage;
   final String aboutText;
+  final String userId;
 
   HospitalMainPage({
     super.key,
@@ -22,6 +24,7 @@ class HospitalMainPage extends StatefulWidget {
     required this.hospitalName,
     required this.hospitalImage,
     required this.aboutText,
+    required this.userId,
   });
 
   @override
@@ -63,8 +66,10 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
     final List<Widget> pages = [
       _dashboardScreen(),
       _doctorManagementScreen(),
-      PatientPage(),
-      AccountPage(),
+      PatientPage(hospitalId: widget.hospitalId),
+
+     AccountPage(hospitalId: widget.hospitalId),
+
     ];
 
     return Scaffold(
@@ -101,14 +106,14 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
             padding: EdgeInsets.all(20),
             child: Text(
               "Hospital Panel",
-              style: TextStyle(
+              style: GoogleFonts.dmSerifDisplay(
                 color: Colors.white,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          Divider(color: Colors.white24),
+          Divider(color: Colors.white24, thickness: 3),
           _sidebarItem(Icons.dashboard, "Dashboard", 0),
           _sidebarItem(Icons.medical_information, "Doctors", 1),
           _sidebarItem(Icons.people, "Patients", 2),
@@ -118,7 +123,10 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
             padding: EdgeInsets.all(12),
             child: Text(
               "© 2025 VIRMEDO",
-              style: TextStyle(color: Colors.white54, fontSize: 12),
+              style: GoogleFonts.germaniaOne(
+                color: Colors.white54,
+                fontSize: 16,
+              ),
             ),
           ),
         ],
@@ -138,34 +146,65 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
         ),
         child: ListTile(
           leading: Icon(icon, color: Colors.white),
-          title: Text(title, style: TextStyle(color: Colors.white)),
+          title: Text(title, style: GoogleFonts.gloock(color: Colors.white)),
         ),
       ),
     );
   }
 
   Widget _buildBottomNavigationBar() {
-    return BottomNavigationBar(
-      currentIndex: _selectedIndex,
-      backgroundColor: Color.fromARGB(255, 4, 46, 81),
-      selectedItemColor: Colors.white,
-      unselectedItemColor: Colors.white54,
-      onTap: (index) => setState(() => _selectedIndex = index),
-      items: [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.dashboard),
-          label: "Dashboard",
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color.fromARGB(255, 4, 46, 81), Colors.blue],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.medical_information),
-          label: "Doctors",
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(22),
+          topRight: Radius.circular(22),
         ),
-        BottomNavigationBarItem(icon: Icon(Icons.people), label: "Patients"),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.account_circle),
-          label: "Account",
+        child: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: Colors.white,
+          unselectedItemColor: Colors.white70,
+          onTap: (index) => setState(() => _selectedIndex = index),
+          type: BottomNavigationBarType.fixed,
+
+          selectedLabelStyle: GoogleFonts.merriweather(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+          unselectedLabelStyle: GoogleFonts.merriweather(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Colors.white70,
+          ),
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.dashboard),
+              label: "Dashboard",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.medical_information),
+              label: "Doctors",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.people),
+              label: "Patients",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.account_circle),
+              label: "Account",
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -174,34 +213,62 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
       {
         "name": "Rooms",
         "icon": Icons.meeting_room,
-        "page": RoomScreen(hospitalId: widget.hospitalId),
+        "page": HospitalRoomPage(hospitalId: widget.hospitalId),
       },
       {
         "name": "Request",
         "icon": Icons.request_page,
-        "page": RequestScreen(hospitalId: widget.hospitalId),
+        "page": RequestServicePage(hospitalId: widget.hospitalId),
       },
       {
         "name": "Map",
         "icon": Icons.map,
-        "page": MapScreen(hospitalId: widget.hospitalId),
+        "page": MapServicePage(hospitalId: widget.hospitalId),
       },
       {
-        "name": "Report",
+        "name": "Reports",
         "icon": Icons.description,
-        "page": ReportScreen(hospitalId: widget.hospitalId),
+        "page": ReportScreen(
+          hospitalId: widget.hospitalId,
+          hospitalName: widget.hospitalName,
+        ),
       },
       {
         "name": "Emergency",
         "icon": Icons.emergency,
-        "page": EmergencyScreen(hospitalId: widget.hospitalId),
+        "page": EmergencyServicePage(hospitalId: widget.hospitalId),
+      },
+        {
+        "name": "Feedback",
+        "icon": Icons.feedback,
+        "page": HospitalFeedbackPage(hospitalId: widget.hospitalId),
       },
     ];
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("${widget.hospitalName} Dashboard"),
-        backgroundColor: Color.fromARGB(255, 4, 46, 81),
+        title: Text(
+          "${widget.hospitalName}",
+          style: GoogleFonts.merriweather(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            fontSize: 22,
+          ),
+        ),
+        centerTitle: true,
+
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color.fromARGB(255, 4, 46, 81), Colors.blue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -246,7 +313,7 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
                       SizedBox(height: 10),
                       Text(
                         service["name"],
-                        style: TextStyle(
+                        style: GoogleFonts.mateSc(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -262,80 +329,290 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
       ),
     );
   }
+  // -----original one---------------//
+  // Widget _doctorManagementScreen() {
+  //   final TextEditingController nameController = TextEditingController();
 
+  //   final TextEditingController specializationController =
+  //       TextEditingController();
+  //   final TextEditingController codeController = TextEditingController();
+
+  //   return Scaffold(
+  //     appBar: AppBar(
+  //       title: Text("Manage Doctors"),
+  //       backgroundColor: Color.fromARGB(255, 4, 46, 81),
+  //     ),
+  //     body: Padding(
+  //       padding: EdgeInsets.all(16.0),
+  //       child: Column(
+  //         children: [
+  //           TextField(
+  //             controller: nameController,
+  //             decoration: InputDecoration(labelText: "Doctor Name"),
+  //           ),
+
+  //           TextField(
+  //             controller: specializationController,
+  //             decoration: InputDecoration(labelText: "Specialization"),
+  //           ),
+  //           TextField(
+  //             controller: codeController,
+  //             decoration: InputDecoration(labelText: "Hospital Code"),
+  //           ),
+
+  //           SizedBox(height: 20),
+  //           ElevatedButton(
+  //             style: ElevatedButton.styleFrom(
+  //               backgroundColor: Color.fromARGB(255, 4, 46, 81),
+  //             ),
+  //             onPressed: () async {
+  //               String doctorId = const Uuid().v4();
+  //               final doctorData = {
+  //                 "id": doctorId,
+  //                 "name": nameController.text.trim(),
+  //                 "specialization": specializationController.text.trim(),
+  //                 "hospitalName": widget.hospitalName,
+  //                 "hospitalId": widget.hospitalId,
+  //                 "hospitalCode": codeController.text.trim(),
+  //                 "role": "Doctor",
+  //                 "image": "https://via.placeholder.com/400",
+  //                 "createdAt": DateTime.now().toIso8601String(),
+  //               };
+
+  //               await dbRef
+  //                   .child("hospitals/${widget.hospitalId}/doctors/$doctorId")
+  //                   .set(doctorData);
+
+  //               ScaffoldMessenger.of(context).showSnackBar(
+  //                 SnackBar(content: Text("Doctor added successfully")),
+  //               );
+
+  //               nameController.clear();
+  //               specializationController.clear();
+  //               codeController.clear();
+  //             },
+
+  //             child: Text("Add Doctor"),
+  //           ),
+  //           Expanded(
+  //             child: StreamBuilder(
+  //               stream: dbRef
+  //                   .child("hospitals/${widget.hospitalId}/doctors")
+  //                   .onValue,
+  //               builder: (context, snapshot) {
+  //                 if (snapshot.connectionState == ConnectionState.waiting) {
+  //                   return Center(child: CircularProgressIndicator());
+  //                 }
+
+  //                 if (snapshot.hasData &&
+  //                     snapshot.data!.snapshot.value != null) {
+  //                   final data = Map<String, dynamic>.from(
+  //                     snapshot.data!.snapshot.value as Map<dynamic, dynamic>,
+  //                   );
+  //                   final doctors = data.values.toList();
+
+  //                   return ListView.builder(
+  //                     itemCount: doctors.length,
+  //                     itemBuilder: (context, index) {
+  //                       final doctor = Map<String, dynamic>.from(
+  //                         doctors[index],
+  //                       );
+  //                       return ListTile(
+  //                         leading: Icon(Icons.person),
+  //                         title: Text(doctor['name']),
+  //                         subtitle: Text(
+  //                           "${doctor['specialization']} | ${doctor['email']}",
+  //                         ),
+  //                       );
+  //                     },
+  //                   );
+  //                 } else {
+  //                   return Center(child: Text("No doctors added yet."));
+  //                 }
+  //               },
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  //---------------------------- added one--------------//
   Widget _doctorManagementScreen() {
-    final TextEditingController nameController = TextEditingController();
-
-    final TextEditingController specializationController =
-        TextEditingController();
-    final TextEditingController codeController = TextEditingController();
+    final nameController = TextEditingController();
+    final specializationController = TextEditingController();
+    final codeController = TextEditingController();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Manage Doctors"),
-        backgroundColor: Color.fromARGB(255, 4, 46, 81),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          "Manage Doctors",
+          style: GoogleFonts.merriweather(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        centerTitle: true,
+
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color.fromARGB(255, 4, 46, 81), Colors.blue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
+
       body: Padding(
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(labelText: "Doctor Name"),
-            ),
+            // ------------------- GRADIENT FORM -------------------
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: LinearGradient(
+                  colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 6,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
 
-            TextField(
-              controller: specializationController,
-              decoration: InputDecoration(labelText: "Specialization"),
-            ),
-            TextField(
-              controller: codeController,
-              decoration: InputDecoration(labelText: "Hospital Code"),
+              child: Column(
+                children: [
+                  // Row 1
+                  Row(
+                    children: [
+                      Expanded(
+                        child: buildStyledField(nameController, "Doctor Name"),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: buildStyledField(
+                          specializationController,
+                          "Specialization",
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 12),
+
+                  // Row 2
+                  Row(
+                    children: [
+                      Expanded(
+                        child: buildStyledField(
+                          emailController,
+                          "Doctor Email",
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: buildStyledField(
+                          passwordController,
+                          "Password",
+                          obscure: true,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 12),
+
+                  // Row 3 (single field)
+                  buildStyledField(codeController, "Hospital Code"),
+
+                  SizedBox(height: 20),
+
+                  // Add Doctor Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        backgroundColor: Colors.white,
+                        foregroundColor: Color.fromARGB(255, 6, 33, 55),
+                      ),
+                      onPressed: () async {
+                        if (nameController.text.trim().isEmpty ||
+                            specializationController.text.trim().isEmpty ||
+                            codeController.text.trim().isEmpty ||
+                            emailController.text.trim().isEmpty ||
+                            passwordController.text.trim().isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Please fill all fields")),
+                          );
+                          return;
+                        }
+
+                        String doctorId = Uuid().v4();
+
+                        final doctorData = {
+                          "doctorId": doctorId,
+                          "name": nameController.text.trim(),
+                          "specialization": specializationController.text
+                              .trim(),
+                          "email": emailController.text.trim(),
+                          "password": passwordController.text.trim(),
+                          "hospitalId": widget.hospitalId,
+                          "hospitalName": widget.hospitalName,
+                          "hospitalCode": codeController.text.trim(),
+                          "role": "Doctor",
+                          "image": "https://via.placeholder.com/400",
+                          "createdAt": DateTime.now().toIso8601String(),
+                        };
+
+                        // Save doctor
+                        await dbRef
+                            .child(
+                              "hospitals/${widget.hospitalId}/doctors/$doctorId",
+                            )
+                            .set(doctorData);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Doctor added successfully")),
+                        );
+
+                        nameController.clear();
+                        specializationController.clear();
+                        codeController.clear();
+                        emailController.clear();
+                        passwordController.clear();
+                      },
+                      child: Text(
+                        "Add Doctor",
+                        style: GoogleFonts.germaniaOne(fontSize: 20),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 4, 46, 81),
-              ),
-              onPressed: () async {
 
-
-        
-                String doctorId = const Uuid().v4();
-                final doctorData = {
-                  "id": doctorId,
-                  "name": nameController.text.trim(),
-                  
-
-                  "specialization": specializationController.text.trim(),
-                  "hospitalName": widget.hospitalName,
-                  "hospitalId": widget.hospitalId,
-                  "hospitalCode": codeController.text.trim(),
-                  "role": "Doctor",
-                  "image": "https://via.placeholder.com/400",
-                  "createdAt": DateTime.now().toIso8601String(),
-                };
-
-             
-                await dbRef.child("doctors/$doctorId").set(doctorData);
-
-                await dbRef
-                    .child("hospitals/${widget.hospitalId}/doctors/$doctorId")
-                    .set(doctorData);
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Doctor added successfully")),
-                );
-
-           
-                nameController.clear();
-                specializationController.clear();
-                codeController.clear();
-              },
-
-              child: Text("Add Doctor"),
-            ),
+            // ------------------- DOCTOR LIST -------------------
             Expanded(
               child: StreamBuilder(
                 stream: dbRef
@@ -349,32 +626,121 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
                   if (snapshot.hasData &&
                       snapshot.data!.snapshot.value != null) {
                     final data = Map<String, dynamic>.from(
-                      snapshot.data!.snapshot.value as Map<dynamic, dynamic>,
+                      snapshot.data!.snapshot.value as Map,
                     );
-                    final doctors = data.values.toList();
+
+                    final doctors = data.entries.toList();
 
                     return ListView.builder(
                       itemCount: doctors.length,
                       itemBuilder: (context, index) {
+                        final doctorId = doctors[index].key;
                         final doctor = Map<String, dynamic>.from(
-                          doctors[index],
+                          doctors[index].value,
                         );
-                        return ListTile(
-                          leading: Icon(Icons.person),
-                          title: Text(doctor['name']),
-                          subtitle: Text(
-                            "${doctor['specialization']} | ${doctor['email']}",
+                        return Card(
+                          elevation: 6,
+                          shadowColor: Colors.black54,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.blue,
+                                  Color.fromARGB(255, 6, 33, 55),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: ListTile(
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                              leading: CircleAvatar(
+                                radius: 26,
+                                backgroundColor: Colors.white,
+                                child: Icon(
+                                  Icons.person,
+                                  color: Color.fromARGB(255, 4, 46, 81),
+                                  size: 28,
+                                ),
+                              ),
+                              title: Text(
+                                doctor["name"] ?? "Unknown",
+                                style: GoogleFonts.neuton(
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Text(
+                                "${doctor["specialization"]} || ${doctor["email"]}",
+                                style: GoogleFonts.germaniaOne(
+                                  fontSize: 14,
+                                  color: Colors.white,
+                                ),
+                              ),
+
+                              trailing: IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () async {
+                                  await dbRef
+                                      .child(
+                                        "hospitals/${widget.hospitalId}/doctors/$doctorId",
+                                      )
+                                      .remove();
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text("Doctor removed")),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         );
                       },
                     );
-                  } else {
-                    return Center(child: Text("No doctors added yet."));
                   }
+
+                  return Center(child: Text("No doctors added yet."));
                 },
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget buildStyledField(
+    TextEditingController controller,
+    String label, {
+    bool obscure = false,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscure,
+      style: GoogleFonts.germaniaOne(color: Colors.white, fontSize: 16),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.ibarraRealNova(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+        filled: true,
+        fillColor: Colors.white.withOpacity(0.15),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white70),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white, width: 2),
         ),
       ),
     );

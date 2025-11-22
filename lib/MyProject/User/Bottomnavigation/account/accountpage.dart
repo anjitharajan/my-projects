@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:virmedo/MyProject/User/Bottomnavigation/account/editpage.dart';
+import 'package:virmedo/MyProject/signup/login/loginpage.dart';
 import 'package:virmedo/MyProject/signup/signupscreen/signupscreen.dart';
 
 class Accountpage extends StatefulWidget {
@@ -23,25 +25,8 @@ class _AccountpageState extends State<Accountpage> {
     return Scaffold(
       backgroundColor: Colors.white,
 
-      // appBar: AppBar(
-      //   backgroundColor: Colors.white,
-      //   elevation: 0,
-      //   centerTitle: true,
-      //   title:  Text(
-      //     "My Profile",
-      //     style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-      //   ),
-      //   leading: IconButton(
-      //     icon:  Icon(Icons.arrow_back_ios, color: Colors.black),
-      //     onPressed: () => Navigator.pop(context),
-      //   ),
-      //   actions:  [
-      //     Padding(
-      //       padding: EdgeInsets.only(right: 16),
-      //       child: Icon(Icons.settings_outlined, color: Colors.black),
-      //     ),
-      //   ],
-      // ),
+
+
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20),
         child: Column(
@@ -58,11 +43,13 @@ class _AccountpageState extends State<Accountpage> {
             SizedBox(height: 10),
             Text(
               name.isEmpty ? "Your Name" : name,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style:  GoogleFonts.germaniaOne(
+                fontSize: 18, ),
             ),
             Text(
               email.isEmpty ? "@email.com" : email,
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style:  GoogleFonts.germaniaOne(
+                color: Colors.grey, fontSize: 14),
             ),
             SizedBox(height: 10),
             ElevatedButton(
@@ -98,7 +85,8 @@ class _AccountpageState extends State<Accountpage> {
               ),
               child: Text(
                 "Edit Profile",
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                style:GoogleFonts.neuton(
+                  color: Colors.white, fontSize: 18),
               ),
             ),
 
@@ -114,7 +102,7 @@ class _AccountpageState extends State<Accountpage> {
                     ),
                     title: Text(
                       "My Profile",
-                      style: TextStyle(
+                      style: GoogleFonts.germaniaOne(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: Color.fromARGB(255, 4, 46, 81),
@@ -137,6 +125,7 @@ class _AccountpageState extends State<Accountpage> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                       padding: EdgeInsets.all(12),
+                      
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
@@ -167,7 +156,8 @@ class _AccountpageState extends State<Accountpage> {
                     leading: Icon(Icons.logout, color: Colors.redAccent),
                     title: Text(
                       "Log out",
-                      style: TextStyle(color: Colors.redAccent),
+                      style: GoogleFonts.germaniaOne(
+                        color: Colors.redAccent),
                     ),
                     trailing: Icon(
                       Icons.arrow_forward_ios,
@@ -177,7 +167,7 @@ class _AccountpageState extends State<Accountpage> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => SignUpScreen()),
+                        MaterialPageRoute(builder: (context) => LoginPage()),
                       );
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text("Logged out successfully")),
@@ -200,13 +190,14 @@ class _AccountpageState extends State<Accountpage> {
         children: [
           Text(
             "$label : ",
-            style: TextStyle(
+            style:  GoogleFonts.merriweather(
               fontWeight: FontWeight.w100,
               fontSize: 16,
               color: Colors.white,
             ),
           ),
-          Expanded(child: Text(value, style: TextStyle(fontSize: 14))),
+          Expanded(child: Text(value, style:  GoogleFonts.merriweather(
+            fontSize: 14))),
         ],
       ),
     );

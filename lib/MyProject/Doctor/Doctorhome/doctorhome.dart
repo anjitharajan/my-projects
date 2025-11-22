@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DoctorAppointmentsPage extends StatefulWidget {
   final String doctorId;
@@ -19,8 +20,29 @@ class DoctorAppointmentsPage extends StatefulWidget {
 
 class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> {
   final dbRef = FirebaseDatabase.instance.ref();
+  late DatabaseReference appointmentsRef;
 
-  // ------------------- Add Prescription -------------------
+  @override
+  void initState() {
+    super.initState();
+    print("Doctor Screen → doctorId = ${widget.doctorId}");
+    print("Doctor Screen → hospitalId = ${widget.hospitalId}");
+    print(
+      "Doctor Screen → Path = hospitals/${widget.hospitalId}/doctors/${widget.doctorId}/appointments",
+    );
+
+    print(
+      "DoctorAppointmentsPage: doctorId=${widget.doctorId}, hospitalId=${widget.hospitalId}",
+    );
+    appointmentsRef = dbRef.child(
+      "hospitals/${widget.hospitalId}/doctors/${widget.doctorId}/appointments",
+    );
+    appointmentsRef.get().then((snapshot) {
+      print("Initial snapshot value: ${snapshot.value}");
+    });
+  }
+
+  // ------------------- Add Prescription -------------------//
   Future<void> _addPrescription({
     required String appointmentId,
     required String userId,
@@ -28,100 +50,266 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> {
     required String hospitalName,
   }) async {
     final controller = TextEditingController();
+    final root = FirebaseDatabase.instance.ref();
 
     await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text("Add Prescription"),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: "Enter prescription details...",
-            ),
-            maxLines: 4,
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Cancel"),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF6A11CB), Color(0xFF2575FC)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                final text = controller.text.trim();
-                if (text.isNotEmpty) {
-                  final ref = dbRef
-                      .child("Users/$userId/medicalRecords")
-                      .push();
-                  await ref.set({
-                    "doctorId": widget.doctorId,
-                    "doctorName": "Dr. ${widget.doctorName}",
-                    "hospitalName": hospitalName,
-                    "prescription": text,
-                    "date": DateTime.now().toIso8601String(),
-                  });
-                }
-                Navigator.pop(context);
-              },
-              child: Text("Save"),
+
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Add Prescription",
+                    style: GoogleFonts.gloock(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  SizedBox(height: 15),
+                  TextField(
+                    controller: controller,
+                    maxLines: 4,
+                    style: GoogleFonts.boogaloo(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Enter prescription details...",
+                      hintStyle: GoogleFonts.oregano(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          "Cancel",
+                          style: GoogleFonts.germaniaOne(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Color(0xFF2575FC),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () async {
+                          final text = controller.text.trim();
+                          if (text.isEmpty) return;
+
+                          final prescriptionData = {
+                            "appointmentId": appointmentId,
+                            "userId": userId,
+                            "userName": userName,
+                            "doctorId": widget.doctorId,
+                            "doctorName": widget.doctorName,
+                            "hospitalId": widget.hospitalId,
+                            "hospitalName": hospitalName,
+                            "date": DateTime.now().toIso8601String(),
+                            "prescription": text,
+                          };
+
+                          // 1️⃣ SAVE under doctor → inside appointment
+                          // SAVE MEDICAL RECORD (not prescription)
+                          await root
+                              .child(
+                                "hospitals/${widget.hospitalId}/doctors/${widget.doctorId}/appointments/$appointmentId/medicalRecord",
+                              )
+                              .set(prescriptionData);
+
+                          // Mirror inside user
+                          await root
+                              .child("users/$userId/medicalRecord")
+                              .push()
+                              .set(prescriptionData);
+
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Save",
+                          style: GoogleFonts.germaniaOne(
+                            color: Color.fromARGB(255, 4, 46, 81),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         );
       },
     );
   }
 
-  // ------------------- Add Diet Plan -------------------
+  // ------------------- Add Diet Plan -------------------//
   Future<void> _addDietPlan({
+    required String appointmentId,
     required String userId,
     required String userName,
     required String hospitalName,
   }) async {
     final controller = TextEditingController();
+    final root = FirebaseDatabase.instance.ref();
 
     await showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text("Add Diet Plan"),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(hintText: "Enter diet plan details..."),
-            maxLines: 4,
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Cancel"),
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF00B09B), Color(0xFF96C93D)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                final text = controller.text.trim();
-                if (text.isNotEmpty) {
-                  final ref = dbRef.child("Users/$userId/dietPlans").push();
-                  await ref.set({
-                    "doctorId": widget.doctorId,
-                    "doctorName": "Dr. ${widget.doctorName}",
-                    "hospitalName": hospitalName,
-                    "dietPlan": text,
-                    "date": DateTime.now().toIso8601String(),
-                  });
-                }
-                Navigator.pop(context);
-              },
-              child: Text("Save"),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "Add Diet Plan",
+                    style: GoogleFonts.gloock(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 15),
+                  TextField(
+                    controller: controller,
+                    maxLines: 4,
+                    style: GoogleFonts.boogaloo(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Enter diet plan details...",
+                      hintStyle: GoogleFonts.oregano(
+                        color: Colors.white70,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.1),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(
+                          "Cancel",
+                          style: GoogleFonts.germaniaOne(color: Colors.white),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Color(0xFF2575FC),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        onPressed: () async {
+                          final text = controller.text.trim();
+                          if (text.isEmpty) return;
+                          final dietData = {
+                            "appointmentId": appointmentId,
+                            "userId": userId,
+                            "userName": userName,
+                            "doctorId": widget.doctorId,
+                            "doctorName": widget.doctorName,
+                            "hospitalId": widget.hospitalId,
+                            "hospitalName": hospitalName,
+                            "date": DateTime.now().toIso8601String(),
+                            "dietPlan": text,
+                          };
+
+                          // SAVE DIET (correct key: diet)
+                          await root
+                              .child(
+                                "hospitals/${widget.hospitalId}/doctors/${widget.doctorId}/appointments/$appointmentId/diet",
+                              )
+                              .set(dietData);
+
+                          // Mirror inside user → push ensures unique key
+                          await root
+                              .child("users/$userId/diet")
+                              .push()
+                              .set(dietData);
+
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "Save",
+                          style: GoogleFonts.germaniaOne(
+                            color: Color.fromARGB(255, 4, 46, 81),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         );
       },
     );
   }
 
-  // ------------------- Cancel Appointment -------------------
+  // ------------------- Cancel Appointment -------------------//
   Future<void> _cancelAppointment(String appointmentId) async {
     await dbRef
         .child(
-          "hospitals/${widget.hospitalId}/doctors/${widget.doctorId}/appointments/$appointmentId").remove();
+          "hospitals/${widget.hospitalId}/doctors/${widget.doctorId}/appointments/$appointmentId",
+        )
+        .remove();
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -131,58 +319,88 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> {
     );
   }
 
-  // ------------------- UI Builder -------------------
+  // ------------------- UI -------------------//
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF5F6FA),
       appBar: AppBar(
-        backgroundColor: Color(0xFF043051),
         centerTitle: true,
+        elevation: 0,
         title: Text(
-          "My Appointments - Dr. ${widget.doctorName}",
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          " Appointments for  Dr. ${widget.doctorName}",
+          style: GoogleFonts.merriweather(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+    leading: IconButton(
+  icon: Icon(
+    Icons.arrow_back_ios_new,
+    color: Colors.white,
+  ),
+  onPressed: () {
+    Navigator.pop(context); 
+  },
+),
+  // white icons
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color.fromARGB(255, 4, 46, 81), Colors.blue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
         ),
       ),
-      body: StreamBuilder(
-        stream: dbRef
-            .child(
-              "hospitals/${widget.hospitalId}/doctors/${widget.doctorId}/appointments",
-            )
-            .onValue,
 
+      body: StreamBuilder<DatabaseEvent>(
+        stream: appointmentsRef.onValue,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (!snapshot.hasData || snapshot.data?.snapshot.value == null) {
+          if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
             return const Center(child: Text("No appointments yet."));
           }
 
-          final data = snapshot.data!.snapshot.value;
+          final snapshotValue = snapshot.data!.snapshot.value;
+          print(
+            "Firebase raw snapshot: $snapshotValue (${snapshotValue.runtimeType})",
+          );
 
-     
-          if (data == null || data is! Map<dynamic, dynamic>) {
-            return const Center(child: Text("No appointments yet."));
+          List<MapEntry<dynamic, dynamic>> apptList;
+
+          if (snapshotValue is Map) {
+            apptList = snapshotValue.entries.toList();
+          } else if (snapshotValue is List) {
+            apptList = snapshotValue
+                .asMap()
+                .entries
+                .where((e) => e.value != null)
+                .map((e) => MapEntry(e.key, e.value))
+                .toList();
+          } else {
+            return const Center(child: Text("No appointments available."));
           }
-
-          final appointments = Map<String, dynamic>.from(data);
-
-          final apptList = appointments.entries.toList()
-            ..sort((a, b) {
-              final aDate =
-                  DateTime.tryParse(a.value['dateTime']?.toString() ?? '') ??
-                  DateTime.now();
-              final bDate =
-                  DateTime.tryParse(b.value['dateTime']?.toString() ?? '') ??
-                  DateTime.now();
-              return aDate.compareTo(bDate);
-            });
 
           if (apptList.isEmpty) {
-            return const Center(child: Text("No appointments for you yet."));
+            return const Center(child: Text("No appointments yet."));
           }
+
+          // Sort appointments by dateTime
+          apptList.sort((a, b) {
+            final aDate =
+                DateTime.tryParse(a.value['dateTime']?.toString() ?? '') ??
+                DateTime.now();
+            final bDate =
+                DateTime.tryParse(b.value['dateTime']?.toString() ?? '') ??
+                DateTime.now();
+            return aDate.compareTo(bDate);
+          });
 
           return ListView.builder(
             padding: const EdgeInsets.all(12),
@@ -197,79 +415,149 @@ class _DoctorAppointmentsPageState extends State<DoctorAppointmentsPage> {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 3,
-                child: ListTile(
-                  leading: const Icon(
-                    Icons.person,
-                    color: Color(0xFF043051),
-                    size: 36,
-                  ),
-                  title: Text(
-                    appt["userName"] ?? "Unknown User",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF043051),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: const LinearGradient(
+                      colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
                   ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("${appt["date"] ?? ""} • ${appt["time"] ?? ""}"),
-                      if (appt["status"] != null)
-                        Text(
-                          "Status: ${appt["status"]}",
-                          style: TextStyle(
-                            color: appt["status"] == "Booked"
-                                ? Colors.green
-                                : Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      if (appt["userEmail"] != null)
-                        Text(
-                          "Email: ${appt["userEmail"]}",
-                          style: const TextStyle(color: Colors.black54),
-                        ),
-                    ],
-                  ),
+                  child: ListTile(
+                    leading: Icon(Icons.person, color: Colors.white, size: 36),
+                    title: Text(
+                      appt["userName"] ?? "Unknown User",
+                      style: GoogleFonts.merriweather(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
 
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'prescription') {
-                            _addPrescription(
-                              appointmentId: appointmentId,
-                              userId: appt["userId"],
-                              userName: appt["userName"],
-                              hospitalName:
-                                  appt["hospitalName"] ?? widget.hospitalId,
-                            );
-                          } else if (value == 'diet') {
-                            _addDietPlan(
-                              userId: appt["userId"],
-                              userName: appt["userName"],
-                              hospitalName:
-                                  appt["hospitalName"] ?? widget.hospitalId,
-                            );
-                          }
-                        },
-                        itemBuilder: (context) => const [
-                          PopupMenuItem(
-                            value: 'prescription',
-                            child: Text("Add Prescription"),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "${appt["date"] ?? ""} • ${appt["time"] ?? ""}",
+                          style: GoogleFonts.germaniaOne(
+                            color:
+                                Colors.white, // <<< Set your desired color here
+                            fontWeight: FontWeight.w500,
                           ),
-                          PopupMenuItem(
-                            value: 'diet',
-                            child: Text("Add Diet Plan"),
+                        ),
+                        if (appt["status"] != null)
+                          Text(
+                            "Status: ${appt["status"]}",
+                            style: GoogleFonts.gloock(
+                              color: appt["status"] == "Booked"
+                                  ? const Color.fromARGB(255, 157, 244, 160)
+                                  : const Color.fromARGB(255, 241, 161, 156),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
-                        ],
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.cancel, color: Colors.red),
-                        onPressed: () => _cancelAppointment(appointmentId),
-                      ),
-                    ],
+                        if (appt["userEmail"] != null)
+                          Text(
+                            "Email: ${appt["userEmail"]}",
+                            style: GoogleFonts.gloock(color: Colors.white),
+                          ),
+                      ],
+                    ),
+
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        PopupMenuButton<String>(
+                          icon: Icon(
+                            Icons.more_vert,
+                            color: Colors.white, // <<< Icon color you want
+                          ),
+                          color: Colors.transparent,
+                          elevation: 0,
+                          onSelected: (value) {
+                            if (value == 'prescription') {
+                              _addPrescription(
+                                appointmentId: appointmentId,
+                                userId: appt["userId"],
+                                userName: appt["userName"],
+                                hospitalName:
+                                    appt["hospitalName"] ?? widget.hospitalId,
+                              );
+                            } else if (value == 'diet') {
+                              _addDietPlan(
+                                appointmentId: appointmentId,
+                                userId: appt["userId"],
+                                userName: appt["userName"],
+                                hospitalName:
+                                    appt["hospitalName"] ?? widget.hospitalId,
+                              );
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'prescription',
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xFF6A11CB),
+                                      Color(0xFF2575FC),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  child: Text(
+                                    "Add Prescription",
+                                    style: GoogleFonts.dmSerifDisplay(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            PopupMenuItem(
+                              value: 'diet',
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Color(0xFF00B09B),
+                                      Color(0xFF96C93D),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  child: Text(
+                                    "Add Diet Plan",
+                                    style: GoogleFonts.dmSerifDisplay(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.cancel,
+                            size: 29,
+                            color: Color.fromARGB(255, 235, 48, 35),
+                          ),
+                          onPressed: () => _cancelAppointment(appointmentId),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

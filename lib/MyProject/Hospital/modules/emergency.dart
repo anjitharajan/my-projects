@@ -12,6 +12,41 @@ class EmergencyServicePage extends StatefulWidget {
 
 class _EmergencyServicePageState extends State<EmergencyServicePage> {
   final DatabaseReference dbRef = FirebaseDatabase.instance.ref();
+  final Set<String> seenKeys = {}; // Track notified emergencies
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Show realtime notifications
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      dbRef
+          .child("hospitals/${widget.hospitalId}/services/emergencies")
+          .onChildAdded
+          .listen((event) {
+            final eKey = event.snapshot.key;
+            if (eKey == null || seenKeys.contains(eKey)) return;
+
+            seenKeys.add(eKey);
+
+            final data = event.snapshot.value as Map?;
+            if (data == null) return;
+
+            final e = Map<String, dynamic>.from(data);
+
+            final userName = e['userName'] ?? "Unknown User";
+            final message = e['message'] ?? "No message";
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("🚨 Emergency from $userName: $message"),
+                backgroundColor: Colors.redAccent,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +56,9 @@ class _EmergencyServicePageState extends State<EmergencyServicePage> {
         backgroundColor: const Color.fromARGB(255, 4, 46, 81),
       ),
       body: StreamBuilder(
-        stream:
-            dbRef.child("hospitals/${widget.hospitalId}/emergencies").onValue,
+        stream: dbRef
+            .child("hospitals/${widget.hospitalId}/services/emergencies")
+            .onValue,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -32,12 +68,16 @@ class _EmergencyServicePageState extends State<EmergencyServicePage> {
             return const Center(child: Text("No emergency alerts yet."));
           }
 
-          final data = Map<String, dynamic>.from(
-              snapshot.data!.snapshot.value as Map<dynamic, dynamic>);
+          final rawData =
+              snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
+          final data = Map<String, dynamic>.from(rawData);
+
           final emergencies = data.entries.toList()
-            ..sort((a, b) => b.value['timestamp']
-                .toString()
-                .compareTo(a.value['timestamp'].toString())); // latest first
+            ..sort(
+              (a, b) => b.value['timestamp'].toString().compareTo(
+                a.value['timestamp'].toString(),
+              ),
+            );
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -53,7 +93,8 @@ class _EmergencyServicePageState extends State<EmergencyServicePage> {
                 elevation: 4,
                 margin: const EdgeInsets.only(bottom: 12),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: ListTile(
                   leading: Icon(
                     Icons.emergency,
@@ -61,37 +102,71 @@ class _EmergencyServicePageState extends State<EmergencyServicePage> {
                         ? Colors.green
                         : Colors.redAccent,
                   ),
+
                   title: Text(
-                    e['userName'] ?? "Unknown User",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    e['title'] ?? "Emergency",
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
+
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Text("User: ${e['userName'] ?? '-'}"),
                       Text("Room: ${e['roomNumber'] ?? '-'}"),
-                      Text("Message: ${e['message'] ?? 'No message'}"),
+                      Text("Phone: ${e['phone'] ?? '-'}"),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Message: ${e['message'] ?? 'No message'}",
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 4),
                       Text("Time: ${e['timestamp'] ?? ''}"),
+                      const SizedBox(height: 4),
                       Text(
                         "Status: ${e['status'] ?? 'pending'}",
                         style: TextStyle(
                           color: e['status'] == 'attended'
                               ? Colors.green
                               : Colors.redAccent,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
+
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) async {
                       if (value == 'attend') {
+                        // Update hospital node
                         await dbRef
                             .child(
-                                "hospitals/${widget.hospitalId}/emergencies/$eKey/status")
+                              "hospitals/${widget.hospitalId}/services/emergencies/$eKey/status",
+                            )
                             .set('attended');
+
+                        // Get userId to update user node also
+                        final userIdSnap = await dbRef
+                            .child(
+                              "hospitals/${widget.hospitalId}/services/emergencies/$eKey/userId",
+                            )
+                            .get();
+
+                        if (userIdSnap.exists) {
+                          final userId = userIdSnap.value.toString();
+
+                          // Update user emergency node
+                          await dbRef
+                              .child("users/$userId/emergencies/$eKey/status")
+                              .set("attended");
+                        }
                       } else if (value == 'delete') {
                         await dbRef
                             .child(
-                                "hospitals/${widget.hospitalId}/emergencies/$eKey")
+                              "hospitals/${widget.hospitalId}/services/emergencies/$eKey",
+                            )
                             .remove();
                       }
                     },

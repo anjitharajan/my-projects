@@ -1,18 +1,19 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Bookingpage extends StatefulWidget {
   final Function(List<Map<String, String>>) onBooked;
   final String userId;
   final String userName;
-    final String userEmail;
+  final String userEmail;
 
   Bookingpage({
     super.key,
     required this.onBooked,
     required this.userId,
     required this.userName,
-        this.userEmail = "",
+    this.userEmail = "",
   });
 
   @override
@@ -79,16 +80,20 @@ class _BookingpageState extends State<Bookingpage> {
 
   Future<void> _fetchUserAppointments() async {
     try {
-      final snapshot = await dbRef.child("users/${widget.userId}/appointments").get();
+      final snapshot = await dbRef
+          .child("users/${widget.userId}/appointments")
+          .get();
       if (snapshot.exists) {
         final data = snapshot.value as Map<dynamic, dynamic>;
         List<Map<String, String>> loadedAppointments = data.values
             .map((e) => Map<String, String>.from(e))
             .toList();
 
-        
-        loadedAppointments.sort((a, b) =>
-            DateTime.parse(a['dateTime']!).compareTo(DateTime.parse(b['dateTime']!)));
+        loadedAppointments.sort(
+          (a, b) => DateTime.parse(
+            a['dateTime']!,
+          ).compareTo(DateTime.parse(b['dateTime']!)),
+        );
 
         setState(() {
           bookedAppointments = loadedAppointments;
@@ -98,6 +103,7 @@ class _BookingpageState extends State<Bookingpage> {
       print("Error fetching user appointments: $e");
     }
   }
+
   void _cancelAppointment(int index) async {
     final appt = bookedAppointments[index];
     try {
@@ -120,7 +126,7 @@ class _BookingpageState extends State<Bookingpage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Appointment cancelled"),
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.blue,
         ),
       );
     } catch (e) {
@@ -128,9 +134,10 @@ class _BookingpageState extends State<Bookingpage> {
     }
   }
 
-
   Future<void> _selectDateTime(
-      BuildContext context, Map<String, dynamic> doctor) async {
+    BuildContext context,
+    Map<String, dynamic> doctor,
+  ) async {
     final doctorId = doctor['id']?.toString() ?? "";
     final hospitalId = doctor['hospitalId']?.toString() ?? "";
 
@@ -148,7 +155,6 @@ class _BookingpageState extends State<Bookingpage> {
       lastDate: DateTime.now().add(const Duration(days: 30)),
     );
 
- 
     if (pickedDate == null) return;
 
     TimeOfDay? pickedTime = await showTimePicker(
@@ -166,7 +172,6 @@ class _BookingpageState extends State<Bookingpage> {
       pickedTime.minute,
     );
 
-  
     bool duplicate = bookedAppointments.any((appt) {
       final dt = appt['dateTime'];
       if (dt == null) return false;
@@ -174,17 +179,16 @@ class _BookingpageState extends State<Bookingpage> {
           appt['doctorId'] == doctorId;
     });
 
-
     if (duplicate) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("You already have an appointment at this time.")),
+        const SnackBar(
+          content: Text("You already have an appointment at this time."),
+        ),
       );
       return;
     }
     final appointmentId = dbRef.push().key!;
 
-
-  
     final appointmentData = {
       "appointmentId": appointmentId,
       "userId": widget.userId,
@@ -204,33 +208,44 @@ class _BookingpageState extends State<Bookingpage> {
     };
 
     try {
-  // Write to Firebase first
-  await dbRef.child("hospitals/$hospitalId/doctors/$doctorId/appointments/$appointmentId")
-      .set(appointmentData);
-  await dbRef.child("users/${widget.userId}/appointments/$appointmentId")
-      .set(appointmentData);
-  await dbRef.child("hospitals/$hospitalId/connectedUsers/${widget.userId}")
-      .set(true);
+      //-------------appointment details to the firebase--------------------//
+//-------doctor side--------//
+// 1️⃣ Store under the hospital → doctor node (already correct)
+await dbRef
+    .child("hospitals/$hospitalId/doctors/$doctorId/appointments/$appointmentId")
+    .set(appointmentData);
 
-  // Then update local state
-  setState(() {
-    bookedAppointments.add(
-      appointmentData.map((key, value) => MapEntry(key, value.toString()))
-    );
-  });
+//-----user side-----//
+await dbRef
+    .child("users/${widget.userId}/appointments/$appointmentId")
+    .set(appointmentData);
 
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text("Appointment booked with ${doctor['name']}")),
-  );
-} catch (e) {
-  // If Firebase write fails, local state is not updated
-  print("Error booking appointment: $e");
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text("Failed to book appointment: $e")),
-  );
-}
+// (Optional) track which users have interacted with a hospital
+await dbRef
+    .child("hospitals/$hospitalId/connectedUsers/${widget.userId}")
+    .set(true);
 
+
+      //------------- update local state-------------------//
+      setState(() {
+        bookedAppointments.add(
+          appointmentData.map((key, value) => MapEntry(key, value.toString())),
+        );
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Appointment booked with ${doctor['name']}")),
+        
+      );
+    } catch (e) {
+      //-------------- If Firebase write fails, local state is not updated--------------//
+      print("Error booking appointment: $e");
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to book appointment: $e")));
+    }
   }
+
   Widget _buildDoctorCard(Map<String, dynamic> doctor) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -260,19 +275,21 @@ class _BookingpageState extends State<Bookingpage> {
               children: [
                 Text(
                   doctor['name'],
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style:GoogleFonts.neuton(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
                 ),
                 Text(
                   doctor['spec'] ?? "",
-                  style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  style:GoogleFonts.germaniaOne(
+                    color: Colors.white70, fontSize: 13),
                 ),
                 Text(
                   doctor['hospital'] ?? "",
-                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  style: GoogleFonts.germaniaOne(
+                    color: Colors.white70, fontSize: 12),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -280,7 +297,8 @@ class _BookingpageState extends State<Bookingpage> {
                     const Icon(Icons.star, color: Colors.amber, size: 16),
                     Text(
                       doctor['rating'].toString(),
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: GoogleFonts.germaniaOne(
+                        color: Colors.white, fontSize: 13),
                     ),
                   ],
                 ),
@@ -296,7 +314,11 @@ class _BookingpageState extends State<Bookingpage> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: const Text("Book"),
+            child:  Text("Book",
+             style:  GoogleFonts.germaniaOne(
+              fontSize: 18,
+              fontWeight: FontWeight.normal
+              ))
           ),
         ],
       ),
@@ -305,7 +327,8 @@ class _BookingpageState extends State<Bookingpage> {
 
   Widget _buildScheduleCard(String name, String desc, String time, int index) {
     return Container(
-      width: 200,
+      width: 220,
+      //ight: 300,
       margin: const EdgeInsets.only(right: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -328,42 +351,51 @@ class _BookingpageState extends State<Bookingpage> {
         children: [
           Text(
             name,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+          style:GoogleFonts.neuton(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
           ),
-          const SizedBox(height: 4),
+          ),
+          const SizedBox(height: 1),
           Text(
             desc,
-            style: const TextStyle(color: Colors.white70, fontSize: 12),
+            style: GoogleFonts.germaniaOne(
+              color: Colors.white, fontSize: 16),
           ),
-          const Spacer(),
+      
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  const Icon(
-                    Icons.access_time,
-                    size: 14,
-                    color: Colors.white70,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    time,
-                    style: const TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ],
+              const Icon(
+                Icons.calendar_month_outlined,
+                size: 14,
+                color: Colors.white,
               ),
-              TextButton(
-                onPressed: () => _cancelAppointment(index),
-                style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                child: const Text("Cancel"),
-              ),
+              SizedBox(width: 5,),
+              
+          Text(
+            time,
+            style: GoogleFonts.germaniaOne(
+              color: Colors.white, fontSize: 12),
+          ),
+         
             ],
           ),
+     
+          Spacer(),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () => _cancelAppointment(index),
+                  style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+                  child:  Text("Cancel",
+                  style:  GoogleFonts.germaniaOne(
+                     fontSize: 17,
+              fontWeight: FontWeight.normal
+                   )
+                  )
+                ),
+              ),
+           
         ],
       ),
     );
@@ -379,9 +411,11 @@ class _BookingpageState extends State<Bookingpage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+             Text(
               "Upcoming Schedule",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style:  GoogleFonts.germaniaOne(
+                fontSize: 20,
+                 color: Color(0xFF042E51)),
             ),
             const SizedBox(height: 10),
             SizedBox(
@@ -408,9 +442,11 @@ class _BookingpageState extends State<Bookingpage> {
                     ),
             ),
             const SizedBox(height: 25),
-            const Text(
+             Text(
               "Available Doctors",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style:  GoogleFonts.germaniaOne(
+                fontSize: 20,
+                 color: Color(0xFF042E51)),
             ),
             const SizedBox(height: 10),
             if (isLoading)

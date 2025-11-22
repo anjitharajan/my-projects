@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Page2 extends StatefulWidget {
   Page2({super.key});
@@ -60,7 +61,7 @@ class _Page2State extends State<Page2> {
           children: [
             Text(
               "Registered Hospitals",
-              style: TextStyle(
+              style: GoogleFonts.merriweather(
                 fontSize: 26,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
@@ -97,9 +98,9 @@ class _Page2State extends State<Page2> {
                               DataColumn(
                                 label: Text(
                                   "Name",
-                                  style: TextStyle(
+                                  style: GoogleFonts.gloock(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                 
                                     fontSize: 16,
                                   ),
                                 ),
@@ -107,9 +108,9 @@ class _Page2State extends State<Page2> {
                               DataColumn(
                                 label: Text(
                                   "Address",
-                                  style: TextStyle(
+                                  style:  GoogleFonts.gloock(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                
                                     fontSize: 16,
                                   ),
                                 ),
@@ -117,9 +118,9 @@ class _Page2State extends State<Page2> {
                               DataColumn(
                                 label: Text(
                                   "Code",
-                                  style: TextStyle(
+                                  style:  GoogleFonts.gloock(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                   
                                     fontSize: 16,
                                   ),
                                 ),
@@ -127,9 +128,9 @@ class _Page2State extends State<Page2> {
                               DataColumn(
                                 label: Text(
                                   "Contact",
-                                  style: TextStyle(
+                                  style:  GoogleFonts.gloock(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                   
                                     fontSize: 16,
                                   ),
                                 ),
@@ -140,48 +141,48 @@ class _Page2State extends State<Page2> {
                                 cells: [
                                   DataCell(
                                     Padding(
-                                      padding:  EdgeInsets.all(8.0),
+                                      padding: EdgeInsets.all(8.0),
                                       child: Text(
                                         h['name'] ?? '',
-                                        style: TextStyle(
+                                        style:  GoogleFonts.gupter(
                                           color: Colors.white70,
-                                          fontSize: 14,
+                                          fontSize: 15,
                                         ),
                                       ),
                                     ),
                                   ),
                                   DataCell(
                                     Padding(
-                                      padding:  EdgeInsets.all(8.0),
+                                      padding: EdgeInsets.all(8.0),
                                       child: Text(
                                         h['address'] ?? '',
-                                        style: TextStyle(
+                                        style: GoogleFonts.gupter(
                                           color: Colors.white70,
-                                          fontSize: 14,
+                                         fontSize: 15,
                                         ),
                                       ),
                                     ),
                                   ),
                                   DataCell(
                                     Padding(
-                                      padding:  EdgeInsets.all(8.0),
+                                      padding: EdgeInsets.all(8.0),
                                       child: Text(
                                         h['code'] ?? '',
-                                        style: TextStyle(
+                                        style: GoogleFonts.gupter(
                                           color: Colors.white70,
-                                          fontSize: 14,
+                                          fontSize: 15,
                                         ),
                                       ),
                                     ),
                                   ),
                                   DataCell(
                                     Padding(
-                                      padding:  EdgeInsets.all(8.0),
+                                      padding: EdgeInsets.all(8.0),
                                       child: Text(
                                         h['contact'] ?? '',
-                                        style: TextStyle(
+                                        style: GoogleFonts.gupter(
                                           color: Colors.white70,
-                                          fontSize: 14,
+                                          fontSize: 15,
                                         ),
                                       ),
                                     ),
@@ -192,7 +193,7 @@ class _Page2State extends State<Page2> {
                             columnSpacing: 10,
                             dataRowHeight: 48,
                             headingRowHeight: 60,
-                            dividerThickness: 1.3, 
+                            dividerThickness: 1.3,
                             showBottomBorder: true,
                           ),
                         ),
