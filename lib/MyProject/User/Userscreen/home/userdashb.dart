@@ -7,7 +7,8 @@ import 'package:virmedo/MyProject/User/Bottomnavigation/dashhome/homepg.dart';
 class Userdashboard extends StatefulWidget {
   final String userId;
   final String userName;
-  Userdashboard({super.key, required this.userId, required this.userName});
+   
+  Userdashboard({super.key, required this.userId, required this.userName,});
 
   @override
   State<Userdashboard> createState() => __UserdashboardStateState();
@@ -25,7 +26,7 @@ class __UserdashboardStateState extends State<Userdashboard> {
   void _updateAppointments(List<Map<String, String>> appointments) {
     setState(() {
       _appointments = appointments;
-    });
+    });  
   }
 
   @override
@@ -35,6 +36,7 @@ class __UserdashboardStateState extends State<Userdashboard> {
       Bookingpage(
         userId: widget.userId,
         userName: widget.userName,
+       
         onBooked: (newAppointments) {
           setState(() {
             _appointments = newAppointments;
@@ -57,11 +59,14 @@ class __UserdashboardStateState extends State<Userdashboard> {
             fontSize: 24,
           ),
         ),
-        iconTheme: IconThemeData(color: Colors.white), // white icons
+        // leading: Padding(
+        //   padding: const EdgeInsets.only(left: 20),
+        //   child: Icon(Icons.arrow_back_ios,color: Colors.white,),
+        // ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-                  colors: [Color.fromARGB(255, 4, 46, 81),Colors.blue, ],
+              colors: [Color.fromARGB(255, 4, 46, 81), Colors.blue],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -70,29 +75,31 @@ class __UserdashboardStateState extends State<Userdashboard> {
       ),
 
       body: pages[_currentIndex],
-      //   _buildBody(),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 4, 46, 81),Colors.blue, ],
+            colors: [Color.fromARGB(255, 4, 46, 81), Colors.blue],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
         ),
+
+
+        //-------------------------------bottomnavigation-----------------------------\\
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           currentIndex: _currentIndex,
           selectedItemColor: Colors.white,
           unselectedItemColor: const Color.fromARGB(179, 175, 169, 169),
-            selectedLabelStyle: GoogleFonts.grenzeGotisch(
-    fontSize: 16,
-    fontWeight: FontWeight.bold,
-  ),
-  unselectedLabelStyle: GoogleFonts.grenzeGotisch(
-    fontSize: 14,
-    fontWeight: FontWeight.w400,
-  ),
+          selectedLabelStyle: GoogleFonts.grenzeGotisch(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+          unselectedLabelStyle: GoogleFonts.grenzeGotisch(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+          ),
           type: BottomNavigationBarType.fixed,
           onTap: (index) {
             setState(() => _currentIndex = index);

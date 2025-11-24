@@ -9,7 +9,6 @@ class EnableScreen extends StatefulWidget {
   final String hospitalImage;
   final String aboutText;
   final String userId;
- 
 
   const EnableScreen({
     super.key,
@@ -18,7 +17,6 @@ class EnableScreen extends StatefulWidget {
     required this.hospitalImage,
     required this.aboutText,
     required this.userId,
-       
   });
 
   @override
@@ -36,7 +34,7 @@ class _EnableScreenState extends State<EnableScreen> {
     fetchHospitalStatus();
   }
 
-  ///  Check if hospital is already enabled by this user
+  //---------checking if hospital is already enabled by this user--------------\\
   Future<void> fetchHospitalStatus() async {
     final snapshot = await _dbRef
         .child("users/${widget.userId}/enabledHospitals/${widget.hospitalId}")
@@ -48,28 +46,30 @@ class _EnableScreenState extends State<EnableScreen> {
     });
   }
 
-  /// Enable connection between user and hospital (two-way link)
+  //-------------Enable connection between user and hospital---------------\\
   Future<void> enableHospital() async {
     try {
-      // Store hospital under user's enabled hospitals
+      //---------Store hospital under users enabled hospitals------------\\
       await _dbRef
           .child("users/${widget.userId}/enabledHospitals/${widget.hospitalId}")
           .set({
-        "hospitalName": widget.hospitalName,
-        "enabledAt": DateTime.now().toIso8601String(),
-      });
+            "hospitalName": widget.hospitalName,
+            "enabledAt": DateTime.now().toIso8601String(),
+          });
 
-      // Store user under hospital’s connected users
-   await _dbRef
-  .child("hospitals/${widget.hospitalId}/connectedUsers/${widget.userId}")
-  .set({
-    //-------- original--------//
-    // "name": (await _dbRef.child("users/${widget.userId}/name").get()).value,
-    //--------//
-    "name": (await _dbRef.child("users/${widget.userId}/userDetails/name").get()).value,
- //-------------//
-    "connectedAt": DateTime.now().toIso8601String(),
-  });
+      //----Store user under hospital’s connected users--------------\\
+      await _dbRef
+          .child(
+            "hospitals/${widget.hospitalId}/connectedUsers/${widget.userId}",
+          )
+          .set({
+            "name":
+                (await _dbRef
+                        .child("users/${widget.userId}/userDetails/name")
+                        .get())
+                    .value,
+            "connectedAt": DateTime.now().toIso8601String(),
+          });
 
       setState(() {
         isEnabled = true;
@@ -79,36 +79,35 @@ class _EnableScreenState extends State<EnableScreen> {
         const SnackBar(content: Text("Hospital successfully enabled!")),
       );
 
-Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (context) => HospitalPage(
-      hospitalId: widget.hospitalId,   
-      hospitalName: widget.hospitalName,
-      hospitalImage: widget.hospitalImage,
-      aboutText: widget.aboutText,
-      userId: widget.userId,
-    
-          
-    ),
-  ),
-);
-
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error enabling hospital: $e")),
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HospitalPage(
+            hospitalId: widget.hospitalId,
+            hospitalName: widget.hospitalName,
+            hospitalImage: widget.hospitalImage,
+            aboutText: widget.aboutText,
+            userId: widget.userId,
+          ),
+        ),
       );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error enabling hospital: $e")));
     }
   }
 
-  ///  Cancel hospital link (remove both sides)
+  //------------cancel hospital link both side-----------\\
   Future<void> cancelHospitalLink() async {
     try {
       await _dbRef
           .child("users/${widget.userId}/enabledHospitals/${widget.hospitalId}")
           .remove();
       await _dbRef
-          .child("hospitals/${widget.hospitalId}/connectedUsers/${widget.userId}")
+          .child(
+            "hospitals/${widget.hospitalId}/connectedUsers/${widget.userId}",
+          )
           .remove();
 
       setState(() {
@@ -118,33 +117,30 @@ Navigator.pushReplacement(
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Hospital link cancelled successfully!")),
       );
-         Navigator.pop(context);
+      Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error cancelling link: $e")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error cancelling link: $e")));
     }
- 
-
   }
 
-  ///  Show confirmation dialog before unlinking
+  //------Showing confirmation dialog before unlinking---------------\\
   Future<void> _showCancelDialog() async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Cancel Connection"),
         content: const Text(
-            "Are you sure you want to cancel the link with this hospital?"),
+          "Are you sure you want to cancel the link with this hospital?",
+        ),
         actions: [
           TextButton(
             child: const Text("No"),
             onPressed: () => Navigator.pop(context, false),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
             child: const Text("Yes, Cancel"),
             onPressed: () => Navigator.pop(context, true),
           ),
@@ -162,16 +158,17 @@ Navigator.pushReplacement(
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-          centerTitle: true,
+        centerTitle: true,
         elevation: 0,
         title: Text(
           widget.hospitalName,
-         style: GoogleFonts.nunito(
+          style: GoogleFonts.nunito(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 24,
-          ),),
-        iconTheme: IconThemeData(color: Colors.white), // white icons
+          ),
+        ),
+        iconTheme: IconThemeData(color: Colors.white),
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -209,7 +206,7 @@ Navigator.pushReplacement(
                     style: const TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                 ),
-                //const Spacer(),
+
                 Padding(
                   padding: const EdgeInsets.all(24.0),
                   child: Column(
@@ -221,14 +218,17 @@ Navigator.pushReplacement(
                               ? Colors.grey
                               : const Color.fromARGB(255, 4, 46, 81),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 15),
+                            horizontal: 40,
+                            vertical: 15,
+                          ),
                         ),
                         child: Text(
-                          // isEnabled ? "Already Enabled" : "Enable Hospital",
-                          isEnabled ? "Enabled ✔" : "Enable Hospital",
+                          isEnabled ? "Enabled" : "Enable Hospital",
 
                           style: const TextStyle(
-                              fontSize: 16, color: Colors.white),
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -238,7 +238,9 @@ Navigator.pushReplacement(
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Colors.red, width: 2),
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 35, vertical: 12),
+                              horizontal: 35,
+                              vertical: 12,
+                            ),
                           ),
                           child: const Text(
                             "Cancel Link",

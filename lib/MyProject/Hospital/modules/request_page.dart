@@ -20,41 +20,43 @@ class _RequestServicePageState extends State<RequestServicePage> {
     _listenToRequests();
   }
 
+//-------------------- inside hospital request and mapping -----------------\\
   void _listenToRequests() {
     dbRef
         .child("hospitals/${widget.hospitalId}/services/requests")
         .onValue
         .listen((event) {
-      final data = event.snapshot.value;
-      if (data != null && data is Map) {
-        setState(() {
-          requests = data.entries.map((e) {
-            final value = Map<String, dynamic>.from(e.value);
-            value["requestId"] = e.key;
-            return value;
-          }).toList();
+          final data = event.snapshot.value;
+          if (data != null && data is Map) {
+            setState(() {
+              requests = data.entries.map((e) {
+                final value = Map<String, dynamic>.from(e.value);
+                value["requestId"] = e.key;
+                return value;
+              }).toList();
 
-          // Sort latest first
-          requests.sort((a, b) {
-            final aTime =
-                DateTime.tryParse(a["timestamp"] ?? "") ?? DateTime(0);
-            final bTime =
-                DateTime.tryParse(b["timestamp"] ?? "") ?? DateTime(0);
-            return bTime.compareTo(aTime);
-          });
+              //------------------ Sort latest first------------------------\\
+              requests.sort((a, b) {
+                final aTime =
+                    DateTime.tryParse(a["timestamp"] ?? "") ?? DateTime(0);
+                final bTime =
+                    DateTime.tryParse(b["timestamp"] ?? "") ?? DateTime(0);
+                return bTime.compareTo(aTime);
+              });
+            });
+          } else {
+            setState(() => requests = []);
+          }
         });
-      } else {
-        setState(() => requests = []);
-      }
-    });
   }
 
+//--------------------mark for updation for request attended-----------------------\\
   Future<void> _markResolved(String requestId) async {
     await dbRef
         .child("hospitals/${widget.hospitalId}/services/requests/$requestId")
         .update({"status": "Resolved"});
   }
-
+//------------------------------detele option ------------------\\
   Future<void> _deleteRequest(String requestId) async {
     await dbRef
         .child("hospitals/${widget.hospitalId}/services/requests/$requestId")
@@ -89,10 +91,14 @@ class _RequestServicePageState extends State<RequestServicePage> {
         ),
       ),
       body: requests.isEmpty
-          ?  Center(child: Text("No requests yet...",
-          style:  GoogleFonts.dmSerifDisplay(
-            fontSize: 16
-          )))
+          ? Center(
+              child: Text(
+                "No requests yet...",
+                style: GoogleFonts.dmSerifDisplay(fontSize: 16),
+              ),
+            )
+
+            //--------- reuqst pending----------------\\
           : ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: requests.length,
@@ -100,6 +106,7 @@ class _RequestServicePageState extends State<RequestServicePage> {
                 final req = requests[index];
                 final status = req["status"] ?? "Pending";
 
+      //------------------status updates after attend------------------\\
                 return Card(
                   margin: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
@@ -119,11 +126,12 @@ class _RequestServicePageState extends State<RequestServicePage> {
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 25, horizontal: 20),
+                        vertical: 25,
+                        horizontal: 20,
+                      ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // CENTER ICON
                           Icon(
                             Icons.request_page,
                             size: 70,
@@ -131,7 +139,6 @@ class _RequestServicePageState extends State<RequestServicePage> {
                           ),
                           const SizedBox(height: 20),
 
-                          // REQUEST MESSAGE
                           Text(
                             req["message"] ?? "No message",
                             style: const TextStyle(
@@ -141,8 +148,7 @@ class _RequestServicePageState extends State<RequestServicePage> {
                             ),
                           ),
                           const SizedBox(height: 15),
-
-                          // REQUEST DETAILS
+             //----------------------------- request user info--------------------\\
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -184,7 +190,7 @@ class _RequestServicePageState extends State<RequestServicePage> {
                           ),
                           const SizedBox(height: 15),
 
-                          // ACTION BUTTONS
+                        //----------------- action button-----------------------\\
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
@@ -195,15 +201,20 @@ class _RequestServicePageState extends State<RequestServicePage> {
                                   icon: const Icon(Icons.done),
                                   label: const Text("Resolve"),
                                   style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.green.shade700),
+                                    backgroundColor: Colors.green.shade700,
+                                  ),
                                 ),
                               const SizedBox(width: 10),
+
+                              //------------------- detele options----------------------\\
                               ElevatedButton.icon(
-                                onPressed: () => _deleteRequest(req["requestId"]),
+                                onPressed: () =>
+                                    _deleteRequest(req["requestId"]),
                                 icon: const Icon(Icons.delete),
                                 label: const Text("Delete"),
                                 style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red.shade700),
+                                  backgroundColor: Colors.red.shade700,
+                                ),
                               ),
                             ],
                           ),

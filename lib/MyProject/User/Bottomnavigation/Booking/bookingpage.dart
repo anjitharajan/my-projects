@@ -6,14 +6,14 @@ class Bookingpage extends StatefulWidget {
   final Function(List<Map<String, String>>) onBooked;
   final String userId;
   final String userName;
-  final String userEmail;
+
 
   Bookingpage({
     super.key,
     required this.onBooked,
     required this.userId,
     required this.userName,
-    this.userEmail = "",
+
   });
 
   @override
@@ -107,14 +107,14 @@ class _BookingpageState extends State<Bookingpage> {
   void _cancelAppointment(int index) async {
     final appt = bookedAppointments[index];
     try {
-      // Remove from doctor node
+      //----------------------Remove from inside the hospital/doctor/appointment-------------\\
       await dbRef
           .child(
             "hospitals/${appt['hospitalId']}/doctors/${appt['doctorId']}/appointments/${appt['appointmentId']}",
           )
           .remove();
 
-      // Remove from user node
+      //------------------Remove from user/appointment------------\\
       await dbRef
           .child("users/${widget.userId}/appointments/${appt['appointmentId']}")
           .remove();
@@ -193,7 +193,6 @@ class _BookingpageState extends State<Bookingpage> {
       "appointmentId": appointmentId,
       "userId": widget.userId,
       "userName": widget.userName,
-      "userEmail": widget.userEmail,
       "doctorName": doctor['name']?.toString() ?? "",
       "doctorId": doctorId,
       "hospitalName": doctor['hospital']?.toString() ?? "",
@@ -207,26 +206,26 @@ class _BookingpageState extends State<Bookingpage> {
       "rating": doctor['rating']?.toString() ?? "4.5",
     };
 
+
     try {
-      //-------------appointment details to the firebase--------------------//
-//-------doctor side--------//
-// 1️⃣ Store under the hospital → doctor node (already correct)
-await dbRef
-    .child("hospitals/$hospitalId/doctors/$doctorId/appointments/$appointmentId")
-    .set(appointmentData);
+      //-------------------add appoinment inside the hospital/doctor/appointment--------------\\
+      await dbRef
+          .child(
+            "hospitals/$hospitalId/doctors/$doctorId/appointments/$appointmentId",
+          )
+          .set(appointmentData);
 
-//-----user side-----//
-await dbRef
-    .child("users/${widget.userId}/appointments/$appointmentId")
-    .set(appointmentData);
+      //-----add apoointment into user/appointment-----\\
+      await dbRef
+          .child("users/${widget.userId}/appointments/$appointmentId")
+          .set(appointmentData);
 
-// (Optional) track which users have interacted with a hospital
-await dbRef
-    .child("hospitals/$hospitalId/connectedUsers/${widget.userId}")
-    .set(true);
+      //----------------connected user tracking-----\\
+      await dbRef
+          .child("hospitals/$hospitalId/connectedUsers/${widget.userId}")
+          .set(true);
 
-
-      //------------- update local state-------------------//
+      //------------- update local state-------------------\\
       setState(() {
         bookedAppointments.add(
           appointmentData.map((key, value) => MapEntry(key, value.toString())),
@@ -235,10 +234,9 @@ await dbRef
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Appointment booked with ${doctor['name']}")),
-        
       );
     } catch (e) {
-      //-------------- If Firebase write fails, local state is not updated--------------//
+      //-------------- If Firebase write fails, local state is not updated--------------\\
       print("Error booking appointment: $e");
       ScaffoldMessenger.of(
         context,
@@ -248,8 +246,8 @@ await dbRef
 
   Widget _buildDoctorCard(Map<String, dynamic> doctor) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.only(left: 15, right: 15, top: 3, bottom: 3),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Colors.blue, Color(0xFF042E51)],
@@ -275,30 +273,36 @@ await dbRef
               children: [
                 Text(
                   doctor['name'],
-                  style:GoogleFonts.neuton(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+                  style: GoogleFonts.neuton(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
                 ),
                 Text(
                   doctor['spec'] ?? "",
-                  style:GoogleFonts.germaniaOne(
-                    color: Colors.white70, fontSize: 13),
+                  style: GoogleFonts.germaniaOne(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
                 ),
                 Text(
                   doctor['hospital'] ?? "",
                   style: GoogleFonts.germaniaOne(
-                    color: Colors.white70, fontSize: 12),
+                    color: Colors.white70,
+                    fontSize: 12,
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Row(
                   children: [
                     const Icon(Icons.star, color: Colors.amber, size: 16),
                     Text(
                       doctor['rating'].toString(),
                       style: GoogleFonts.germaniaOne(
-                        color: Colors.white, fontSize: 13),
+                        color: Colors.white,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -314,11 +318,13 @@ await dbRef
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child:  Text("Book",
-             style:  GoogleFonts.germaniaOne(
-              fontSize: 18,
-              fontWeight: FontWeight.normal
-              ))
+            child: Text(
+              "Book",
+              style: GoogleFonts.germaniaOne(
+                fontSize: 18,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
           ),
         ],
       ),
@@ -351,19 +357,18 @@ await dbRef
         children: [
           Text(
             name,
-          style:GoogleFonts.neuton(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
+            style: GoogleFonts.neuton(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 22,
+            ),
           ),
           const SizedBox(height: 1),
           Text(
             desc,
-            style: GoogleFonts.germaniaOne(
-              color: Colors.white, fontSize: 16),
+            style: GoogleFonts.germaniaOne(color: Colors.white, fontSize: 16),
           ),
-      
+
           Row(
             children: [
               const Icon(
@@ -371,31 +376,32 @@ await dbRef
                 size: 14,
                 color: Colors.white,
               ),
-              SizedBox(width: 5,),
-              
-          Text(
-            time,
-            style: GoogleFonts.germaniaOne(
-              color: Colors.white, fontSize: 12),
-          ),
-         
-            ],
-          ),
-     
-          Spacer(),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () => _cancelAppointment(index),
-                  style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-                  child:  Text("Cancel",
-                  style:  GoogleFonts.germaniaOne(
-                     fontSize: 17,
-              fontWeight: FontWeight.normal
-                   )
-                  )
+              SizedBox(width: 5),
+
+              Text(
+                time,
+                style: GoogleFonts.germaniaOne(
+                  color: Colors.white,
+                  fontSize: 12,
                 ),
               ),
-           
+            ],
+          ),
+
+          Spacer(),
+          Center(
+            child: ElevatedButton(
+              onPressed: () => _cancelAppointment(index),
+              style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+              child: Text(
+                "Cancel",
+                style: GoogleFonts.germaniaOne(
+                  fontSize: 17,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -405,21 +411,21 @@ await dbRef
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Text(
+            Text(
               "Upcoming Schedule",
-              style:  GoogleFonts.germaniaOne(
+              style: GoogleFonts.germaniaOne(
                 fontSize: 20,
-                 color: Color(0xFF042E51)),
+                color: Color(0xFF042E51),
+              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
             SizedBox(
-              height: 130,
+              height: 155,
               child: bookedAppointments.isNotEmpty
                   ? ListView.builder(
                       scrollDirection: Axis.horizontal,
@@ -441,12 +447,13 @@ await dbRef
                       ),
                     ),
             ),
-            const SizedBox(height: 25),
-             Text(
+            const SizedBox(height: 40),
+            Text(
               "Available Doctors",
-              style:  GoogleFonts.germaniaOne(
+              style: GoogleFonts.germaniaOne(
                 fontSize: 20,
-                 color: Color(0xFF042E51)),
+                color: Color(0xFF042E51),
+              ),
             ),
             const SizedBox(height: 10),
             if (isLoading)

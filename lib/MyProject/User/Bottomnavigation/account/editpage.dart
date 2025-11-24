@@ -67,41 +67,51 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        centerTitle: true,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 20),
+          child: Icon(Icons.arrow_back_ios, color: Colors.white),
         ),
         title: Text(
           "Edit Profile",
           style: GoogleFonts.merriweather(
-            color: Colors.black, fontWeight: FontWeight.bold),
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        centerTitle: true,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color.fromARGB(255, 4, 46, 81), Colors.blue],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         actions: [
           Padding(
             padding: EdgeInsets.only(right: 16),
             child: IconButton(
-              icon: Icon(Icons.check, color: Colors.green, size: 26),
+              icon: Icon(Icons.check, color: Colors.white, size: 26),
               onPressed: _saveProfile,
             ),
           ),
         ],
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: 10),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 20),
+              SizedBox(height: 50),
               GestureDetector(
                 onTap: _pickImage,
                 child: Stack(
                   alignment: Alignment.bottomRight,
                   children: [
                     CircleAvatar(
-                      radius: 50,
+                      radius: 65,
                       backgroundImage: _imageFile != null
                           ? FileImage(_imageFile!)
                           : AssetImage('assets/profile.jpg'),
@@ -115,18 +125,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: Icon(
                         Icons.camera_alt,
                         color: Colors.white,
-                        size: 16,
+                        size: 20,
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 20),
-              _buildTextField("Name", nameController),
-              _buildTextField("Email address", emailController),
-              _buildTextField("User name", usernameController),
-              _buildPasswordField(),
-              _buildTextField("Phone number", phoneController),
+              SizedBox(height: 35),
+           _buildTextField("Name", nameController, Icons.person),
+_buildTextField("Email address", emailController, Icons.email),
+_buildTextField("User name", usernameController, Icons.account_circle),
+_buildPasswordField(),  // keep your password field separate
+_buildTextField("Phone number", phoneController, Icons.phone),
+
             ],
           ),
         ),
@@ -134,20 +145,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
+  Widget _buildTextField(String label, TextEditingController controller, IconData icon,) {
     return Container(
-      margin: EdgeInsets.only(bottom: 15),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      margin: EdgeInsets.only(bottom: 10),
       child: TextField(
-        style:  GoogleFonts.germaniaOne(),
+        style: GoogleFonts.germaniaOne(    color: Colors.white,),
         controller: controller,
         decoration: InputDecoration(
+       prefixIcon: Icon(
+          icon,
+          color: Colors.white,
+        ),
           labelText: label,
-          labelStyle:  GoogleFonts.germaniaOne(),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey),
+          labelStyle: GoogleFonts.germaniaOne(
+             color: Colors.white,
           ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        
+      border: InputBorder.none,
+          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
     );
@@ -155,27 +183,48 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Widget _buildPasswordField() {
     return Container(
+        decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [
+          Colors.blue,
+          Color.fromARGB(255, 4, 46, 81),
+        ],
+      ),
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.3),
+          blurRadius: 8,
+          offset: Offset(0, 4),
+        ),
+      ],
+    ),
       margin: EdgeInsets.only(bottom: 15),
       child: TextField(
         obscureText: _obscurePassword,
-        style: GoogleFonts.germaniaOne(),
+        style: GoogleFonts.germaniaOne(
+         color:  Colors.white
+        ),
         decoration: InputDecoration(
+           prefixIcon: Icon(
+          Icons.lock,
+          color: Colors.white,
+        ),
           labelText: "Password",
-          labelStyle:  GoogleFonts.germaniaOne(),
+          labelStyle: GoogleFonts.germaniaOne(
+            color: Colors.white
+          ),
           suffixIcon: IconButton(
             icon: Icon(
               _obscurePassword ? Icons.visibility_off : Icons.visibility,
-              color: Colors.grey,
+              color: Colors.white,
             ),
             onPressed: () {
               setState(() => _obscurePassword = !_obscurePassword);
             },
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey),
-          ),
-          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+           border: InputBorder.none,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         ),
       ),
     );

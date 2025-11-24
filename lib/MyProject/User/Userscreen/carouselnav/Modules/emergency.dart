@@ -38,7 +38,8 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
     if (snap.exists) {
       setState(() {
         userName = snap.child("name").value?.toString() ?? "Unknown User";
-        roomNumber = snap.child("roomNumber").value?.toString() ?? "Not Assigned";
+        roomNumber =
+            snap.child("roomNumber").value?.toString() ?? "Not Assigned";
         phoneNumber = snap.child("phone").value?.toString() ?? "No Phone";
         loading = false;
       });
@@ -50,7 +51,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
   Future<void> _sendEmergency() async {
     final String eKey = DateTime.now().millisecondsSinceEpoch.toString();
 
-    // Save under user
+    //-------------save under user node--------------------\\
     await dbRef.child("users/${widget.userId}/emergencies/$eKey").set({
       "title": _titleController.text,
       "message": _descController.text,
@@ -59,19 +60,19 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       "hospitalId": widget.hospitalId,
     });
 
-    // Save under hospital
+    //--------save under hospital node--------------------\\
     await dbRef
         .child("hospitals/${widget.hospitalId}/services/emergencies/$eKey")
         .set({
-      "title": _titleController.text,
-      "message": _descController.text,
-      "timestamp": DateTime.now().toString(),
-      "status": "pending",
-      "userId": widget.userId,
-      "userName": userName,
-      "roomNumber": roomNumber,
-      "phone": phoneNumber,
-    });
+          "title": _titleController.text,
+          "message": _descController.text,
+          "timestamp": DateTime.now().toString(),
+          "status": "pending",
+          "userId": widget.userId,
+          "userName": userName,
+          "roomNumber": roomNumber,
+          "phone": phoneNumber,
+        });
 
     _titleController.clear();
     _descController.clear();
@@ -131,7 +132,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
       body: StreamBuilder(
         stream: dbRef
             .child("users/${widget.userId}/emergencies")
-            .onValue,   // ✅ FIXED
+            .onValue, 
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -143,9 +144,11 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
 
           final rawData = snapshot.data!.snapshot.value as Map;
           final emergencies = rawData.entries.toList()
-            ..sort((a, b) => b.value['timestamp']
-                .toString()
-                .compareTo(a.value['timestamp'].toString()));
+            ..sort(
+              (a, b) => b.value['timestamp'].toString().compareTo(
+                a.value['timestamp'].toString(),
+              ),
+            );
 
           return ListView.builder(
             padding: const EdgeInsets.all(16),
@@ -164,7 +167,9 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                   title: Text(
                     e['title'] ?? "Emergency",
                     style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,7 +186,7 @@ class _EmergencyScreenState extends State<EmergencyScreen> {
                               : Colors.redAccent,
                           fontWeight: FontWeight.bold,
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),

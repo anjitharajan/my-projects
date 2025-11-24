@@ -43,7 +43,7 @@ class _ReportScreenState extends State<ReportScreen> {
     _loadEnabledUsers();
   }
 
-  // ---------------- LOAD ENABLED USERS ----------------\\
+  // ---------------- load enabled users to the hospital/report ----------------\\
   Future<void> _loadEnabledUsers() async {
     setState(() => _isUsersLoading = true);
     enabledUsers.clear();
@@ -59,19 +59,19 @@ class _ReportScreenState extends State<ReportScreen> {
         String userId = child.key!;
         dynamic value = child.value;
 
-        // Case 1: value is true → user is connected
+        //---------------if value true then user is connected with hospital/report-------------\\
         bool isEnabled = false;
         if (value is bool) {
           isEnabled = value;
         }
-        // Case 2: value is a map → assume connected
+        //----------- value is a map to the connected users-------------\\
         else if (value is Map) {
           isEnabled = true;
         }
 
         if (!isEnabled) continue;
 
-        // Fetch user info from 'users' node
+        //---------Fetch user info from users node----------\\
         final userSnap = await _db.child("users/$userId").get();
         String name =
             userSnap.child("name").value?.toString() ??
@@ -88,88 +88,32 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
-  // Future<void> _loadEnabledUsers() async {
-  //   setState(() => _isUsersLoading = true);
+  // ---------------- pick file ----------------\\
+Future<void> _pickFile() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['png', 'jpg', 'jpeg'], // only images
+      allowMultiple: false,
+    );
 
-  //   try {
-  //     final snap = await _db
-  //         .child("hospitals/${widget.hospitalId}/connectedUsers")
-  //         .get();
-  //     print("ConnectedUsers snapshot exists: ${snap.exists}");
-  //     print("ConnectedUsers value: ${snap.value}");
-
-  //     enabledUsers.clear();
-
-  //     if (snap.exists && snap.value != null) {
-  //       for (var child in snap.children) {
-  //         String userId = child.key!;
-  //         final userData = await _db.child("users/$userId").get();
-
-  //         if (!userData.exists) continue; // Skip if user node missing
-
-  //         // Fetch user name
-  //         String name =
-  //             userData.child("name").value?.toString() ?? "Unnamed User";
-
-  //         // Fetch isEnabled safely (if missing, assume true)
-  //         final isEnabledValue = userData.child("isEnabled").value;
-  //         bool isEnabled = true; // default true
-  //         if (isEnabledValue != null) {
-  //           if (isEnabledValue is bool) {
-  //             isEnabled = isEnabledValue;
-  //           } else if (isEnabledValue is String) {
-  //             isEnabled = isEnabledValue.toLowerCase() == "true";
-  //           } else if (isEnabledValue is int) {
-  //             isEnabled = isEnabledValue != 0;
-  //           }
-  //         }
-
-  //         if (isEnabled) {
-  //           enabledUsers.add({"userId": userId, "name": name});
-  //         }
-  //       }
-  //     }
-  //   } catch (e) {
-  //     print("Error loading users: $e");
-  //     enabledUsers = [];
-  //   } finally {
-  //     setState(() => _isUsersLoading = false);
-  //   }
-  // }
-
-  // ---------------- PICK FILE ----------------\\
-  // ---------------- PICK FILE ----------------\\
-  Future<void> _pickFile() async {
-    final result = await FilePicker.platform.pickFiles(allowMultiple: false);
-
-    if (result != null) {
-      final fileBytes = result.files.single.bytes;
+    if (result != null && result.files.single.bytes != null) {
+      final bytes = result.files.single.bytes!;
       final fileName = result.files.single.name;
 
-      if (fileBytes != null) {
-        setState(() {
-          _fileName = fileName;
-          _base64File = base64Encode(fileBytes);
-        });
-      } else if (result.files.single.path != null) {
-        final file = File(result.files.single.path!);
-        final bytes = await file.readAsBytes();
-        setState(() {
-          _selectedFile = file;
-          _fileName = p.basename(file.path);
-          _base64File = base64Encode(bytes);
-        });
-      }
+      setState(() {
+        _fileName = fileName;
+        _base64File = base64Encode(bytes);
+      });
 
-      // After picking file, prompt to select user
       _selectUserDialog();
     }
   }
 
-  // ---------------- SELECT USER DIALOG ----------------\\
+  // -
+  // ---------------- enbaled user list for select ----------------\\
   Future<void> _selectUserDialog() async {
     if (_isUsersLoading) {
-      // Wait until users are loaded
+      //------------ waiting for users load-----------------\\
       await _loadEnabledUsers();
     }
 
@@ -215,7 +159,7 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
-  // ---------------- SAVE REPORT ----------------\\
+  // ---------------- save report ----------------\\
   Future<void> _saveReport() async {
     if (!_formKey.currentState!.validate()) return;
     if (_base64File == null) {
@@ -247,22 +191,10 @@ class _ReportScreenState extends State<ReportScreen> {
         'date': DateFormat('dd-MM-yyyy hh:mm a').format(DateTime.now()),
       };
 
-      // Save under user node
-      await _db
-          .child('users')
-          .child(_selectedUserId!)
-          .child('reports')
-          .child(reportId)
-          .set(reportData);
-
-      // Save under hospital services node (like MapServicePage)
-      await _db
-          .child('hospitals')
-          .child(widget.hospitalId)
-          .child('services')
-          .child('reports')
-          .child(reportId)
-          .set(reportData);
+       // save under user node
+      await _db.child('users/$_selectedUserId/reports/$reportId').set(reportData);
+      // save under hospital services
+      await _db.child('hospitals/${widget.hospitalId}/services/reports/$reportId').set(reportData);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Report added successfully!')),
@@ -271,8 +203,7 @@ class _ReportScreenState extends State<ReportScreen> {
       _titleController.clear();
       _descriptionController.clear();
       setState(() {
-        _selectedFile = null;
-        _fileName = null;
+         _fileName = null;
         _base64File = null;
         _selectedUserId = null;
       });
@@ -285,7 +216,7 @@ class _ReportScreenState extends State<ReportScreen> {
     setState(() => _isLoading = false);
   }
 
-  // ---------------- BUILD UI ----------------\\
+  // ---------------- ui----------------\\
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -302,7 +233,6 @@ class _ReportScreenState extends State<ReportScreen> {
 
         backgroundColor: Colors.transparent,
         elevation: 0,
-
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -320,7 +250,7 @@ class _ReportScreenState extends State<ReportScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ---------------- SELECT USER BUTTON ----------------\\
+              // ---------------- selected user button ----------------\\
               if (_fileName != null)
                 Container(
                   width: double.infinity,
@@ -341,78 +271,75 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
               const SizedBox(height: 20),
               Container(
-                 padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color.fromARGB(255, 4, 46, 81),
-                Colors.blue,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(2),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(12),
-              ),
+                  gradient: const LinearGradient(
+                    colors: [Color.fromARGB(255, 4, 46, 81), Colors.blue],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: TextFormField(
-                    controller: _titleController,
-                    decoration: const InputDecoration(
-                      labelText: "Report Title",
-                      border: InputBorder.none,
+                  padding: const EdgeInsets.all(2),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? "Enter title" : null,
-                     ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: TextFormField(
+                        controller: _titleController,
+                        decoration: const InputDecoration(
+                          labelText: "Report Title",
+                          border: InputBorder.none,
+                        ),
+                        validator: (val) =>
+                            val == null || val.isEmpty ? "Enter title" : null,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ),
 
               const SizedBox(height: 20),
               Container(
-                      decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [
-                Color.fromARGB(255, 4, 46, 81),
-                Colors.blue,
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(2),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.95),
-                borderRadius: BorderRadius.circular(12),
-              ),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color.fromARGB(255, 4, 46, 81), Colors.blue],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                ),
                 child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: TextFormField(
-                    controller: _descriptionController,
-                    maxLines: 4,
-                    decoration: const InputDecoration(
-                      labelText: "Description",
-                      border: InputBorder.none,
+                  padding: const EdgeInsets.all(2),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    validator: (val) =>
-                        val == null || val.isEmpty ? "Enter description" : null,
-                         ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: TextFormField(
+                        controller: _descriptionController,
+                        maxLines: 4,
+                        decoration: const InputDecoration(
+                          labelText: "Description",
+                          border: InputBorder.none,
+                        ),
+                        validator: (val) => val == null || val.isEmpty
+                            ? "Enter description"
+                            : null,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ),
-        ),
               const SizedBox(height: 20),
+
+              //---------------------- attach file --------------------\\
               Container(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -448,7 +375,7 @@ class _ReportScreenState extends State<ReportScreen> {
                         ),
                       ),
                     ),
-                        const SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),

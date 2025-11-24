@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:virmedo/MyProject/signup/login/loginpage.dart';
 
-
 class AccountPage extends StatefulWidget {
   final String hospitalId;
   AccountPage({super.key, required this.hospitalId});
@@ -67,100 +66,121 @@ class _AccountPageState extends State<AccountPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Container(
-          height: 350,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey,
-                blurRadius: 10,
-                spreadRadius: 3,
-                offset: Offset(0, 6), // shadow direction
+        padding: const EdgeInsets.all(10),
+        child: Center(
+          child: Container(
+            height: 375,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-            ],
-          ),
-
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Hospital Name:",
-                style: GoogleFonts.dmSerifDisplay(
-                  color: Colors.white70, fontSize: 16,fontWeight: FontWeight.bold),
-              ),
-              Text(
-                hospitalName,
-                style:GoogleFonts.merriweather(
-                  color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey,
+                  blurRadius: 10,
+                  spreadRadius: 3,
+                  offset: Offset(0, 6),
                 ),
-              ),
-
-              const SizedBox(height: 20),
-
-              Text(
-                "Email:",
-                     style: GoogleFonts.dmSerifDisplay(
-                  color: Colors.white70, fontSize: 14,fontWeight: FontWeight.bold),
-              ),
-              Text(
-                hospitalEmail,
-                style:GoogleFonts.merriweather(
-                  color: Colors.white, fontSize: 16),
-              ),
-
-              const SizedBox(height: 20),
-
-              Text(
-                "Address:",
-                      style: GoogleFonts.dmSerifDisplay(
-                  color: Colors.white70, fontSize: 14,fontWeight: FontWeight.bold),
-              ),
-              Text(
-                hospitalAddress,
-                style:GoogleFonts.merriweather(
-                  color: Colors.white, fontSize: 16),
-              ),
-
-              Padding(
-                padding: const EdgeInsets.all(40),
-                child: Center(
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 14,
+              ],
+            ),
+          
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Hospital Name:",
+                  style: GoogleFonts.dmSerifDisplay(
+                    color: Colors.white70,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  hospitalName,
+                  style: GoogleFonts.merriweather(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+          
+                const SizedBox(height: 20),
+          
+                Text(
+                  "Email:",
+                  style: GoogleFonts.dmSerifDisplay(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  hospitalEmail,
+                  style: GoogleFonts.merriweather(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+          
+                const SizedBox(height: 20),
+          
+                Text(
+                  "Address:",
+                  style: GoogleFonts.dmSerifDisplay(
+                    color: Colors.white70,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  hospitalAddress,
+                  style: GoogleFonts.merriweather(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                ),
+          
+                Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: Center(
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 32,
+                          vertical: 14,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginPage()),
+                        );
+                      },
+                      icon: const Icon(
+                        Icons.logout,
+                        color: Colors.white,
+                        size: 22,
                       ),
-                    ),
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginPage()),
-                      );
-                    },
-                    icon: const Icon(Icons.logout, color: Colors.white,size: 22,),
-                    label: Text(
-                      "Logout",
-                      style:  GoogleFonts.germaniaOne(
-                        color: Colors.white, fontSize: 20),
+                      label: Text(
+                        "Logout",
+                        style: GoogleFonts.germaniaOne(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -23,6 +22,7 @@ class _MapServicePageState extends State<MapServicePage> {
     _loadFloorMaps();
   }
 
+  //------------------- storing map node onside the hospital/service/map -----------\\
   void _loadFloorMaps() {
     dbRef.child("hospitals/${widget.hospitalId}/services/map").onValue.listen((
       event,
@@ -39,6 +39,8 @@ class _MapServicePageState extends State<MapServicePage> {
       }
     });
   }
+
+  //---------------- uploading img from file floor vise ---------------\\
 
   Future<void> _pickAndUploadFloorMap({required String floorName}) async {
     final picker = ImagePicker();
@@ -69,6 +71,7 @@ class _MapServicePageState extends State<MapServicePage> {
     }
   }
 
+  //--------------- delete option of map--------------\\
   void _deleteFloorMap(String floorName) async {
     await dbRef
         .child("hospitals/${widget.hospitalId}/services/map/$floorName")
@@ -78,6 +81,7 @@ class _MapServicePageState extends State<MapServicePage> {
     );
   }
 
+  // ------------view map ------------------------\\
   void _viewFloorMap(String base64Str, String floorName) {
     final bytes = base64Decode(base64Str);
     Navigator.push(

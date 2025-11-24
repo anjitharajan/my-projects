@@ -32,14 +32,15 @@ class RoomScreen extends StatelessWidget {
             );
           }
 
-          final allocData =
-              Map<String, dynamic>.from(snapshot.data!.value as Map);
+          final allocData = Map<String, dynamic>.from(
+            snapshot.data!.value as Map,
+          );
 
           final hospitalId = allocData["hospitalId"];
           final roomNumber = allocData["roomNumber"];
           final allocatedAt = allocData["allocatedAt"];
 
-          //  FETCH HOSPITAL NAME
+          //---------------- fetching hospital name-----------------\\
           return FutureBuilder(
             future: dbRef.child("hospitals/$hospitalId/name").get(),
             builder: (context, hospSnap) {
@@ -53,25 +54,25 @@ class RoomScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 child: Center(
                   child: Container(
-                      margin: const EdgeInsets.all(16),
-  decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(20),
-    gradient: LinearGradient(
-      colors: [
+                    margin: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                        colors: [
                           Colors.blueAccent,
                           Color.fromARGB(255, 4, 46, 81),
                         ],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    ),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black26,
-        blurRadius: 8,
-        offset: Offset(2, 4),
-      ),
-    ],
-  ),
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: Offset(2, 4),
+                        ),
+                      ],
+                    ),
                     child: Card(
                       color: Colors.transparent,
                       shape: RoundedRectangleBorder(
@@ -79,33 +80,32 @@ class RoomScreen extends StatelessWidget {
                       ),
                       elevation: 0,
                       child: Padding(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 25, horizontal: 20),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 25,
+                          horizontal: 20,
+                        ),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // BIG CENTER ICON
                             Icon(
                               Icons.meeting_room,
                               size: 80,
                               color: Colors.white,
                             ),
-                    
+
                             const SizedBox(height: 20),
-                    
-                            // ROOM NUMBER
+
                             Text(
                               "Room No: $roomNumber",
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                              color: Colors.white,
+                                color: Colors.white,
                               ),
                             ),
-                    
+
                             const SizedBox(height: 15),
-                    
-                            // ROOM DETAILS
+
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -113,8 +113,7 @@ class RoomScreen extends StatelessWidget {
                                   "Hospital: $hospitalName",
                                   style: const TextStyle(
                                     fontSize: 18,
-                                 //   fontWeight: FontWeight.w600,
-                                     color: Colors.white,
+                                    color: Colors.white,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -130,7 +129,7 @@ class RoomScreen extends StatelessWidget {
                                   "Allocated At: $allocatedAt",
                                   style: const TextStyle(
                                     fontSize: 16,
-                                  color: Colors.white,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ],

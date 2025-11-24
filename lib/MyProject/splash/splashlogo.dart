@@ -21,6 +21,7 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
+//---------------------- animation duration and scale-------------------\\
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
@@ -51,6 +52,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.dispose();
   }
 
+//-----------ui deign---------------------\\
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,15 +68,14 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset('assets/logo.jpg', width: 300, height: 150),
+                    Image.asset('assets/logo.jpg', width: 100, height: 100),
 
                     Text(
                       "Because every life matters.",
                       style: GoogleFonts.quintessential(
                         color: Color.fromARGB(255, 8, 65, 112),
-                        fontSize: 14,
+                        fontSize: 10,
                         fontWeight: FontWeight.w600,
-                        
                       ),
                     ),
                   ],

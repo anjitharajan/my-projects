@@ -4,10 +4,7 @@ import 'package:firebase_database/firebase_database.dart';
 class HospitalFeedbackPage extends StatefulWidget {
   final String hospitalId;
 
-  const HospitalFeedbackPage({
-    super.key,
-    required this.hospitalId,
-  });
+  const HospitalFeedbackPage({super.key, required this.hospitalId});
 
   @override
   State<HospitalFeedbackPage> createState() => _HospitalFeedbackPageState();
@@ -15,15 +12,15 @@ class HospitalFeedbackPage extends StatefulWidget {
 
 class _HospitalFeedbackPageState extends State<HospitalFeedbackPage> {
   final TextEditingController feedbackController = TextEditingController();
- late DatabaseReference feedbackRef;
+  late DatabaseReference feedbackRef;
 
   @override
   void initState() {
     super.initState();
-    feedbackRef = FirebaseDatabase.instance
-        .ref("hospitals/${widget.hospitalId}/feedback");
+    feedbackRef = FirebaseDatabase.instance.ref(
+      "hospitals/${widget.hospitalId}/feedback",
+    );
   }
-
 
   //-------------- feedback submit -----------------\\
   void submitFeedback() {
@@ -31,16 +28,19 @@ class _HospitalFeedbackPageState extends State<HospitalFeedbackPage> {
 
     final id = feedbackRef.push().key;
 
-    feedbackRef.child(id!).set({
-      "message": feedbackController.text.trim(),
-      "timestamp": DateTime.now().toString(),
-      "attended": false,
-    }).then((_) {
-      feedbackController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Feedback submitted")),
-      );
-    });
+    feedbackRef
+        .child(id!)
+        .set({
+          "message": feedbackController.text.trim(),
+          "timestamp": DateTime.now().toString(),
+          "attended": false,
+        })
+        .then((_) {
+          feedbackController.clear();
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text("Feedback submitted")));
+        });
   }
 
   @override
@@ -60,16 +60,12 @@ class _HospitalFeedbackPageState extends State<HospitalFeedbackPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-
             //---------------- add feedback ----------------\\
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [
-                    Colors.blue,
-                    Color.fromARGB(255, 4, 46, 81),
-                  ],
+                  colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: const [
@@ -78,7 +74,7 @@ class _HospitalFeedbackPageState extends State<HospitalFeedbackPage> {
                     spreadRadius: 2,
                     offset: Offset(0, 4),
                     color: Colors.black26,
-                  )
+                  ),
                 ],
               ),
               child: Column(
@@ -116,7 +112,7 @@ class _HospitalFeedbackPageState extends State<HospitalFeedbackPage> {
                       ),
                       child: const Text("Submit"),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -130,9 +126,7 @@ class _HospitalFeedbackPageState extends State<HospitalFeedbackPage> {
                 builder: (context, snapshot) {
                   if (!snapshot.hasData ||
                       snapshot.data?.snapshot.value == null) {
-                    return const Center(
-                      child: Text("No feedback yet"),
-                    );
+                    return const Center(child: Text("No feedback yet"));
                   }
 
                   final data = Map<String, dynamic>.from(
@@ -145,8 +139,7 @@ class _HospitalFeedbackPageState extends State<HospitalFeedbackPage> {
                     itemCount: items.length,
                     itemBuilder: (context, index) {
                       final entry = items[index];
-                      final feedback =
-                          Map<String, dynamic>.from(entry.value);
+                      final feedback = Map<String, dynamic>.from(entry.value);
 
                       return Card(
                         elevation: 3,
@@ -174,6 +167,7 @@ class _HospitalFeedbackPageState extends State<HospitalFeedbackPage> {
                                   : Colors.orange.shade100,
                               borderRadius: BorderRadius.circular(12),
                             ),
+                   //------------------- update from admin and pending status---------------\\
                             child: Text(
                               feedback["attended"] == true
                                   ? "Attended"

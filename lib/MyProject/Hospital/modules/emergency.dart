@@ -12,13 +12,13 @@ class EmergencyServicePage extends StatefulWidget {
 
 class _EmergencyServicePageState extends State<EmergencyServicePage> {
   final DatabaseReference dbRef = FirebaseDatabase.instance.ref();
-  final Set<String> seenKeys = {}; // Track notified emergencies
+  final Set<String> seenKeys = {};
 
   @override
   void initState() {
     super.initState();
 
-    // Show realtime notifications
+    //------------------ Showing realtime notifications from the user side -------------------------\\
     WidgetsBinding.instance.addPostFrameCallback((_) {
       dbRef
           .child("hospitals/${widget.hospitalId}/services/emergencies")
@@ -39,7 +39,7 @@ class _EmergencyServicePageState extends State<EmergencyServicePage> {
 
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text("🚨 Emergency from $userName: $message"),
+                content: Text(" Emergency from $userName: $message"),
                 backgroundColor: Colors.redAccent,
                 duration: const Duration(seconds: 3),
               ),
@@ -48,6 +48,7 @@ class _EmergencyServicePageState extends State<EmergencyServicePage> {
     });
   }
 
+  //--------------- emergency from hospital/service/emergencies---------------------\\
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,14 +141,14 @@ class _EmergencyServicePageState extends State<EmergencyServicePage> {
                   trailing: PopupMenuButton<String>(
                     onSelected: (value) async {
                       if (value == 'attend') {
-                        // Update hospital node
+                        //--------Update hospital node from user side-------------\\
                         await dbRef
                             .child(
                               "hospitals/${widget.hospitalId}/services/emergencies/$eKey/status",
                             )
                             .set('attended');
 
-                        // Get userId to update user node also
+                        //---------------- Get userid to update user node -----------------\\
                         final userIdSnap = await dbRef
                             .child(
                               "hospitals/${widget.hospitalId}/services/emergencies/$eKey/userId",
@@ -157,11 +158,13 @@ class _EmergencyServicePageState extends State<EmergencyServicePage> {
                         if (userIdSnap.exists) {
                           final userId = userIdSnap.value.toString();
 
-                          // Update user emergency node
+                          //------------------Update user emergency satus node back-------------\\
                           await dbRef
                               .child("users/$userId/emergencies/$eKey/status")
                               .set("attended");
                         }
+
+                        //------------------- remove emergency-----------------------\\
                       } else if (value == 'delete') {
                         await dbRef
                             .child(

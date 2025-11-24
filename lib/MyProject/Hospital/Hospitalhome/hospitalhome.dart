@@ -17,6 +17,8 @@ class HospitalMainPage extends StatefulWidget {
   final String hospitalImage;
   final String aboutText;
   final String userId;
+    final String contact;
+  final String hospitalCode;
 
   HospitalMainPage({
     super.key,
@@ -25,6 +27,8 @@ class HospitalMainPage extends StatefulWidget {
     required this.hospitalImage,
     required this.aboutText,
     required this.userId,
+    this.contact = '',
+        this.hospitalCode = '',
   });
 
   @override
@@ -41,7 +45,7 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
     super.initState();
     listenToConnectedUsers();
   }
-
+  //-----------------------connected user-------------\\
   void listenToConnectedUsers() {
     dbRef.child("hospitals/${widget.hospitalId}/connectedUsers").onValue.listen(
       (event) {
@@ -68,8 +72,7 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
       _doctorManagementScreen(),
       PatientPage(hospitalId: widget.hospitalId),
 
-     AccountPage(hospitalId: widget.hospitalId),
-
+      AccountPage(hospitalId: widget.hospitalId),
     ];
 
     return Scaffold(
@@ -86,6 +89,7 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
     );
   }
 
+//--------------------desktop view ---------------------\\
   Widget _buildSidebar() {
     return Container(
       width: 240,
@@ -151,7 +155,7 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
       ),
     );
   }
-
+  //--------------------mobile view ------------------------\\
   Widget _buildBottomNavigationBar() {
     return Container(
       decoration: BoxDecoration(
@@ -238,12 +242,14 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
         "icon": Icons.emergency,
         "page": EmergencyServicePage(hospitalId: widget.hospitalId),
       },
-        {
+      {
         "name": "Feedback",
         "icon": Icons.feedback,
         "page": HospitalFeedbackPage(hospitalId: widget.hospitalId),
       },
     ];
+
+  bool isDesktop = MediaQuery.of(context).size.width > 900;
 
     return Scaffold(
       appBar: AppBar(
@@ -256,10 +262,8 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
           ),
         ),
         centerTitle: true,
-
         backgroundColor: Colors.transparent,
         elevation: 0,
-
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -272,173 +276,117 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
-        child: GridView.builder(
-          itemCount: services.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            mainAxisSpacing: 20,
-            crossAxisSpacing: 20,
-            childAspectRatio: 1.1,
-          ),
-          itemBuilder: (context, index) {
-            final service = services[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => service["page"]),
+       child: isDesktop
+          ? ListView.separated( // *** UPDATED: Desktop view uses ListView instead of Grid ***
+              itemCount: services.length,
+              separatorBuilder: (_, __) => SizedBox(height: 25),
+              itemBuilder: (context, index) {
+                final service = services[index];
+                return GestureDetector( // *** UPDATED: wrapped ListTile in GestureDetector to match mobile navigation ***
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => service["page"]),
+                    );
+                  },
+                  child: Container( 
+                    height: 70,// *** UPDATED: Gradient background for desktop list item ***
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Colors.blueAccent, Color.fromARGB(255, 4, 46, 81)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 5,
+                          offset: Offset(2, 3),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: ListTile(
+                        leading: Icon(service["icon"], color: Colors.white, size: 32),
+                        title: Text(
+                          service["name"],
+                          style: GoogleFonts.merriweather(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
+                        trailing: Icon(Icons.arrow_forward_ios, color: Colors.white70),
+                      ),
+                    ),
+                  ),
                 );
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(16),
-                  gradient: LinearGradient(
-                    colors: [Colors.blueAccent, Color.fromARGB(255, 4, 46, 81)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 5,
-                      offset: Offset(2, 3),
-                    ),
-                  ],
+            )
+          : Padding(
+            padding: const EdgeInsets.only(top: 28,right: 5,left: 5),
+            child: GridView.builder(
+                itemCount: services.length,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 40,
+                  crossAxisSpacing: 25,
+                  childAspectRatio: 1.1,
                 ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(service["icon"], color: Colors.white, size: 36),
-                      SizedBox(height: 10),
-                      Text(
-                        service["name"],
-                        style: GoogleFonts.mateSc(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                itemBuilder: (context, index) {
+                  final service = services[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => service["page"]),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          colors: [Colors.blueAccent, Color.fromARGB(255, 4, 46, 81)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 5,
+                            offset: Offset(2, 3),
+                          ),
+                        ],
+                      ),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(service["icon"], color: Colors.white, size: 36),
+                            SizedBox(height: 10),
+                            Text(
+                              service["name"],
+                              style: GoogleFonts.mateSc(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    ),
+                  );
+                },
               ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-  // -----original one---------------//
-  // Widget _doctorManagementScreen() {
-  //   final TextEditingController nameController = TextEditingController();
+          ),
+    ),
+  );
+}
 
-  //   final TextEditingController specializationController =
-  //       TextEditingController();
-  //   final TextEditingController codeController = TextEditingController();
 
-  //   return Scaffold(
-  //     appBar: AppBar(
-  //       title: Text("Manage Doctors"),
-  //       backgroundColor: Color.fromARGB(255, 4, 46, 81),
-  //     ),
-  //     body: Padding(
-  //       padding: EdgeInsets.all(16.0),
-  //       child: Column(
-  //         children: [
-  //           TextField(
-  //             controller: nameController,
-  //             decoration: InputDecoration(labelText: "Doctor Name"),
-  //           ),
-
-  //           TextField(
-  //             controller: specializationController,
-  //             decoration: InputDecoration(labelText: "Specialization"),
-  //           ),
-  //           TextField(
-  //             controller: codeController,
-  //             decoration: InputDecoration(labelText: "Hospital Code"),
-  //           ),
-
-  //           SizedBox(height: 20),
-  //           ElevatedButton(
-  //             style: ElevatedButton.styleFrom(
-  //               backgroundColor: Color.fromARGB(255, 4, 46, 81),
-  //             ),
-  //             onPressed: () async {
-  //               String doctorId = const Uuid().v4();
-  //               final doctorData = {
-  //                 "id": doctorId,
-  //                 "name": nameController.text.trim(),
-  //                 "specialization": specializationController.text.trim(),
-  //                 "hospitalName": widget.hospitalName,
-  //                 "hospitalId": widget.hospitalId,
-  //                 "hospitalCode": codeController.text.trim(),
-  //                 "role": "Doctor",
-  //                 "image": "https://via.placeholder.com/400",
-  //                 "createdAt": DateTime.now().toIso8601String(),
-  //               };
-
-  //               await dbRef
-  //                   .child("hospitals/${widget.hospitalId}/doctors/$doctorId")
-  //                   .set(doctorData);
-
-  //               ScaffoldMessenger.of(context).showSnackBar(
-  //                 SnackBar(content: Text("Doctor added successfully")),
-  //               );
-
-  //               nameController.clear();
-  //               specializationController.clear();
-  //               codeController.clear();
-  //             },
-
-  //             child: Text("Add Doctor"),
-  //           ),
-  //           Expanded(
-  //             child: StreamBuilder(
-  //               stream: dbRef
-  //                   .child("hospitals/${widget.hospitalId}/doctors")
-  //                   .onValue,
-  //               builder: (context, snapshot) {
-  //                 if (snapshot.connectionState == ConnectionState.waiting) {
-  //                   return Center(child: CircularProgressIndicator());
-  //                 }
-
-  //                 if (snapshot.hasData &&
-  //                     snapshot.data!.snapshot.value != null) {
-  //                   final data = Map<String, dynamic>.from(
-  //                     snapshot.data!.snapshot.value as Map<dynamic, dynamic>,
-  //                   );
-  //                   final doctors = data.values.toList();
-
-  //                   return ListView.builder(
-  //                     itemCount: doctors.length,
-  //                     itemBuilder: (context, index) {
-  //                       final doctor = Map<String, dynamic>.from(
-  //                         doctors[index],
-  //                       );
-  //                       return ListTile(
-  //                         leading: Icon(Icons.person),
-  //                         title: Text(doctor['name']),
-  //                         subtitle: Text(
-  //                           "${doctor['specialization']} | ${doctor['email']}",
-  //                         ),
-  //                       );
-  //                     },
-  //                   );
-  //                 } else {
-  //                   return Center(child: Text("No doctors added yet."));
-  //                 }
-  //               },
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  //---------------------------- added one--------------//
+  //-------------------- doctor  screen ----------------\\
   Widget _doctorManagementScreen() {
     final nameController = TextEditingController();
     final specializationController = TextEditingController();
@@ -459,7 +407,6 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
           ),
         ),
         centerTitle: true,
-
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -472,10 +419,9 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
       ),
 
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.only(top: 35,left: 10,right: 10),
         child: Column(
           children: [
-            // ------------------- GRADIENT FORM -------------------
             Container(
               width: double.infinity,
               padding: EdgeInsets.all(20),
@@ -537,12 +483,10 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
 
                   SizedBox(height: 12),
 
-                  // Row 3 (single field)
                   buildStyledField(codeController, "Hospital Code"),
 
                   SizedBox(height: 20),
 
-                  // Add Doctor Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -583,7 +527,7 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
                           "createdAt": DateTime.now().toIso8601String(),
                         };
 
-                        // Save doctor
+                        //----------------------------- Save doctor inside the hospital/doctor-------------------\\
                         await dbRef
                             .child(
                               "hospitals/${widget.hospitalId}/doctors/$doctorId",
@@ -611,8 +555,7 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
             ),
 
             SizedBox(height: 20),
-
-            // ------------------- DOCTOR LIST -------------------
+            // ------------------- doctor list -------------------\\
             Expanded(
               child: StreamBuilder(
                 stream: dbRef
@@ -685,7 +628,7 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
                                   color: Colors.white,
                                 ),
                               ),
-
+                                       //---------------------------- removing doctor-------------------\\
                               trailing: IconButton(
                                 icon: Icon(Icons.delete, color: Colors.red),
                                 onPressed: () async {
@@ -717,6 +660,7 @@ class _HospitalMainPageState extends State<HospitalMainPage> {
     );
   }
 
+//------------------------------ for the text field---------------------\\
   Widget buildStyledField(
     TextEditingController controller,
     String label, {

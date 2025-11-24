@@ -76,25 +76,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     hospitalImage:
                         user.image ?? 'https://via.placeholder.com/400',
                     aboutText: user.address ?? 'No details available',
+                    contact: user.contact ?? 'N/A', // now valid
+                    hospitalCode: user.adminCode ?? '', // optional
                     userId: user.id ?? '',
                   ),
                 ),
               );
-            }
-            //  else if (user.role == "Doctor") {
-            //   Navigator.pushReplacement(
-            //     context,
-            //     MaterialPageRoute(
-            //       builder: (_) => DoctorAppointmentsPage(
-            //         doctorId: user.id ?? '',
-            //         doctorName: user.name ?? 'Doctor',
-            //         hospitalId:
-            //             user.hospitalId ?? '', // <- pass hospitalId here
-            //       ),
-            //     ),
-            //   );
-            // }
-            else {
+            } else {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
@@ -119,7 +107,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Center(
               child: Container(
                 width: screenSize.width * 0.9,
-                height: screenSize.height * 0.7,
+                height: screenSize.height * 0.8,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
                   boxShadow: [BoxShadow(color: Colors.black, blurRadius: 8)],
@@ -179,16 +167,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             child: TextFormField(
                               controller: _adminCode,
                               style: GoogleFonts.grenzeGotisch(
-                                fontSize: 18,// font size for input text
-                                fontWeight: FontWeight.bold,//nt weight
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
                                 color: Color.fromARGB(255, 4, 46, 81),
                               ),
-                              decoration:  InputDecoration(
+                              decoration: InputDecoration(
                                 labelText: "Hospital Code",
                                 labelStyle: GoogleFonts.grenzeGotisch(
-                                     color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
                                 ),
 
                                 border: OutlineInputBorder(),
@@ -256,7 +244,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             style: GoogleFonts.agbalumo(
                               fontSize: 15,
                               color: Colors.white,
-                              //ontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
@@ -281,18 +268,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
       padding: EdgeInsets.symmetric(vertical: 10.0),
       child: TextFormField(
         style: GoogleFonts.grenzeGotisch(
-          fontSize: 18, //font size for input text
-          fontWeight: FontWeight.bold, //ont weight
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
           color: Color.fromARGB(255, 4, 46, 81),
         ),
         controller: controller,
         obscureText: obscure,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: GoogleFonts.grenzeGotisch(
-            color: Colors.white,
-            //ontWeight: FontWeight.bold,
-          ),
+          labelStyle: GoogleFonts.grenzeGotisch(color: Colors.white),
           border: OutlineInputBorder(),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),

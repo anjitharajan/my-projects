@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart'; 
+import 'package:intl/intl.dart';
 
 class Page3 extends StatefulWidget {
   const Page3({super.key});
@@ -56,10 +56,10 @@ class _Page3State extends State<Page3> {
   }
 
   Future<void> markAsAttended(String hospitalId, String feedbackId) async {
-    await dbRef
-        .child("$hospitalId/feedback/$feedbackId")
-        .update({"attended": true});
-    fetchReviews(); // refresh the list
+    await dbRef.child("$hospitalId/feedback/$feedbackId").update({
+      "attended": true,
+    });
+    fetchReviews();
   }
 
   String formatDate(String timestamp) {
@@ -118,13 +118,13 @@ class _Page3State extends State<Page3> {
                           color: Colors.white.withOpacity(0.95),
                           margin: const EdgeInsets.symmetric(vertical: 10),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: Padding(
                             padding: const EdgeInsets.all(12.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                
                                 Text(
                                   fb["hospital"],
                                   style: GoogleFonts.ibarraRealNova(
@@ -134,7 +134,6 @@ class _Page3State extends State<Page3> {
                                 ),
                                 const SizedBox(height: 6),
 
-                          
                                 Text(
                                   fb["message"],
                                   style: GoogleFonts.ibarraRealNova(
@@ -144,7 +143,6 @@ class _Page3State extends State<Page3> {
                                 ),
                                 const SizedBox(height: 8),
 
-                      
                                 Text(
                                   "Date: ${formatDate(fb["date"])}",
                                   style: GoogleFonts.ibarraRealNova(
@@ -154,14 +152,15 @@ class _Page3State extends State<Page3> {
                                 ),
                                 const SizedBox(height: 12),
 
-                            
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 12, vertical: 6),
+                                        horizontal: 12,
+                                        vertical: 6,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: fb["status"] == "Pending"
                                             ? Colors.orange
@@ -180,9 +179,12 @@ class _Page3State extends State<Page3> {
                                     if (fb["status"] == "Pending")
                                       ElevatedButton(
                                         onPressed: () => markAsAttended(
-                                            fb["hospitalId"], fb["fid"]),
+                                          fb["hospitalId"],
+                                          fb["fid"],
+                                        ),
                                         style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.green),
+                                          backgroundColor: Colors.green,
+                                        ),
                                         child: const Text("Mark as Attended"),
                                       ),
                                   ],

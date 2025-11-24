@@ -32,8 +32,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       ),
       child: ListTile(
         leading: Icon(icon, color: Colors.white),
-        title: Text(title, style: GoogleFonts.gloock(
-          color: Colors.white)),
+        title: Text(title, style: GoogleFonts.gloock(color: Colors.white)),
         onTap: () => _onNavTapped(index),
       ),
     );
@@ -56,9 +55,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
               child: BottomNavigationBar(
                 currentIndex: _selectedIndex,
                 onTap: _onNavTapped,
-                 selectedItemColor: Colors.white,      // white icon + label
-    unselectedItemColor:  Color.fromARGB(255, 185, 189, 194), 
-     elevation: 0,
+                selectedItemColor: Colors.white,
+                unselectedItemColor: Color.fromARGB(255, 185, 189, 194),
+                elevation: 0,
                 backgroundColor: Colors.transparent,
                 items: [
                   BottomNavigationBarItem(
@@ -90,7 +89,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               icon: Icon(Icons.logout, color: Colors.redAccent),
               label: Text(
                 "Logout",
-                style:  GoogleFonts.germaniaOne(
+                style: GoogleFonts.germaniaOne(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                   color: Colors.redAccent,
@@ -130,7 +129,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   style: GoogleFonts.dmSerifDisplay(
                     fontSize: 22,
                     color: Colors.white,
-                 
                   ),
                 ),
               ),
@@ -151,7 +149,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ),
                   title: Text(
                     "Logout",
-                    style:  GoogleFonts.germaniaOne(
+                    style: GoogleFonts.germaniaOne(
                       color: Colors.redAccent,
                       fontWeight: FontWeight.w600,
                       fontSize: 18,
@@ -171,7 +169,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 child: Text(
                   "© 2025 VIRMEDO",
                   style: GoogleFonts.germaniaOne(
-                    color: Colors.white54, fontSize: 16),
+                    color: Colors.white54,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ],
@@ -191,7 +191,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             padding: EdgeInsets.only(bottom: 12, top: 4, right: 390),
             child: Text(
               "©2025 VIRMEDO",
-              style:  GoogleFonts.germaniaOne(
+              style: GoogleFonts.germaniaOne(
                 color: Colors.grey[600],
                 fontSize: 12,
                 fontWeight: FontWeight.w500,

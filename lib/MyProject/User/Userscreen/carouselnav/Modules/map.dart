@@ -20,11 +20,15 @@ class _UserMapScreenState extends State<UserMapScreen> {
   }
 
   void _loadFloorMaps() {
-    dbRef.child("hospitals/${widget.hospitalId}/services/map").onValue.listen((event) {
+    dbRef.child("hospitals/${widget.hospitalId}/services/map").onValue.listen((
+      event,
+    ) {
       final data = event.snapshot.value;
       if (data != null && data is Map) {
         setState(() {
-          floorMaps = data.map((key, value) => MapEntry(key, value['url'].toString()));
+          floorMaps = data.map(
+            (key, value) => MapEntry(key, value['url'].toString()),
+          );
         });
       } else {
         setState(() => floorMaps = {});
@@ -38,11 +42,7 @@ class _UserMapScreenState extends State<UserMapScreen> {
       MaterialPageRoute(
         builder: (_) => Scaffold(
           appBar: AppBar(title: const Text("Floor Map")),
-          body: Center(
-            child: InteractiveViewer(
-              child: Image.network(url),
-            ),
-          ),
+          body: Center(child: InteractiveViewer(child: Image.network(url))),
         ),
       ),
     );

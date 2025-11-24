@@ -10,12 +10,11 @@ class UserModel {
   final String? code;
   final String? contact;
   final String? createdAt;
-  final bool? linked; 
-  final String? authUid; 
-    final String? hospitalId;
+  final bool? linked;
+  final String? authUid;
+  final String? hospitalId;
   final String? hospitalName;
-    final String? doctorId; 
-
+  final String? doctorId;
 
   UserModel({
     this.id,
@@ -31,10 +30,9 @@ class UserModel {
     this.createdAt,
     this.linked,
     this.authUid,
-    this.hospitalId,     
-    this.hospitalName, 
-     this.doctorId, 
-    
+    this.hospitalId,
+    this.hospitalName,
+    this.doctorId,
   });
 
   Map<String, dynamic> toMap() {
@@ -52,11 +50,9 @@ class UserModel {
       "createdAt": createdAt,
       "linked": linked,
       "authUid": authUid,
-      "hospitalId": hospitalId,       
+      "hospitalId": hospitalId,
       "hospitalName": hospitalName,
-       "doctorId": doctorId,
-   
- 
+      "doctorId": doctorId,
     };
   }
 
@@ -66,21 +62,18 @@ class UserModel {
       name: map["name"],
       email: map["email"],
       password: map["password"],
-        role: map['role'],
+      role: map['role'],
       address: map["address"],
       adminCode: map["adminCode"],
       image: map["image"],
-        code: map["code"],
+      code: map["code"],
       contact: map["contact"],
       createdAt: map["createdAt"],
       linked: map["linked"],
       authUid: map["authUid"],
-        hospitalId: map["hospitalId"],       
-      hospitalName: map["hospitalName"], 
-        doctorId: map['doctorId'], 
-
+      hospitalId: map["hospitalId"],
+      hospitalName: map["hospitalName"],
+      doctorId: map['doctorId'],
     );
   }
-
- 
 }

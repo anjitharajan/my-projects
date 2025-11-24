@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:virmedo/MyProject/User/Bottomnavigation/account/editpage.dart';
 import 'package:virmedo/MyProject/signup/login/loginpage.dart';
-import 'package:virmedo/MyProject/signup/signupscreen/signupscreen.dart';
 
 class Accountpage extends StatefulWidget {
   Accountpage({super.key});
@@ -24,34 +23,30 @@ class _AccountpageState extends State<Accountpage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-
-
-
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 10),
+            SizedBox(height: 55),
             CircleAvatar(
-              radius: 45,
+              radius: 65,
               backgroundImage: _imagePath != null
                   ? FileImage(File(_imagePath!))
                   : AssetImage('assets/profile.jpg'),
             ),
 
-            SizedBox(height: 10),
+            SizedBox(height: 12),
             Text(
               name.isEmpty ? "Your Name" : name,
-              style:  GoogleFonts.germaniaOne(
-                fontSize: 18, ),
+              style: GoogleFonts.germaniaOne(fontSize: 24),
             ),
+            SizedBox(height: 2),
             Text(
               email.isEmpty ? "@email.com" : email,
-              style:  GoogleFonts.germaniaOne(
-                color: Colors.grey, fontSize: 14),
+              style: GoogleFonts.germaniaOne(color: Colors.grey, fontSize: 14),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 16),
             ElevatedButton(
               onPressed: () async {
                 final updatedData = await Navigator.push(
@@ -77,20 +72,35 @@ class _AccountpageState extends State<Accountpage> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 4, 46, 81),
+                padding: EdgeInsets.zero, // required for gradient
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: EdgeInsets.symmetric(horizontal: 40, vertical: 10),
               ),
-              child: Text(
-                "Edit Profile",
-                style:GoogleFonts.neuton(
-                  color: Colors.white, fontSize: 18),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 55, vertical: 15),
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Edit Profile",
+                    style: GoogleFonts.neuton(
+                      color: Colors.white,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
               ),
             ),
 
-            SizedBox(height: 25),
+            SizedBox(height: 22),
 
             Expanded(
               child: ListView(
@@ -99,11 +109,12 @@ class _AccountpageState extends State<Accountpage> {
                     leading: Icon(
                       Icons.person,
                       color: Color.fromARGB(255, 4, 46, 81),
+                      size: 28,
                     ),
                     title: Text(
                       "My Profile",
                       style: GoogleFonts.germaniaOne(
-                        fontSize: 16,
+                        fontSize: 18,
                         fontWeight: FontWeight.w500,
                         color: Color.fromARGB(255, 4, 46, 81),
                       ),
@@ -113,6 +124,7 @@ class _AccountpageState extends State<Accountpage> {
                           ? Icons.keyboard_arrow_up
                           : Icons.keyboard_arrow_down,
                       color: Color.fromARGB(255, 4, 46, 81),
+                      size: 25,
                     ),
                     onTap: () {
                       setState(() {
@@ -125,7 +137,6 @@ class _AccountpageState extends State<Accountpage> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
                       padding: EdgeInsets.all(12),
-                      
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
@@ -153,15 +164,21 @@ class _AccountpageState extends State<Accountpage> {
                   Divider(color: Color.fromARGB(255, 4, 46, 81)),
 
                   ListTile(
-                    leading: Icon(Icons.logout, color: Colors.redAccent),
+                    leading: Icon(
+                      Icons.logout,
+                      color: Colors.redAccent,
+                      size: 25,
+                    ),
                     title: Text(
                       "Log out",
                       style: GoogleFonts.germaniaOne(
-                        color: Colors.redAccent),
+                        color: Colors.redAccent,
+                        fontSize: 18,
+                      ),
                     ),
                     trailing: Icon(
                       Icons.arrow_forward_ios,
-                      size: 16,
+                      size: 18,
                       color: Colors.red,
                     ),
                     onTap: () {
@@ -190,14 +207,15 @@ class _AccountpageState extends State<Accountpage> {
         children: [
           Text(
             "$label : ",
-            style:  GoogleFonts.merriweather(
+            style: GoogleFonts.merriweather(
               fontWeight: FontWeight.w100,
               fontSize: 16,
               color: Colors.white,
             ),
           ),
-          Expanded(child: Text(value, style:  GoogleFonts.merriweather(
-            fontSize: 14))),
+          Expanded(
+            child: Text(value, style: GoogleFonts.merriweather(fontSize: 14)),
+          ),
         ],
       ),
     );

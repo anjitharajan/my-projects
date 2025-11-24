@@ -4,13 +4,12 @@ import 'package:flutter/material.dart';
 class DietScreen extends StatelessWidget {
   final String userId;
   final String hospitalId;
- // Non-nullable
 
-  DietScreen({super.key, required this.userId, required this.hospitalId,});
+  DietScreen({super.key, required this.userId, required this.hospitalId});
 
   @override
   Widget build(BuildContext context) {
-   final ref = FirebaseDatabase.instance.ref("users/$userId/diet");
+    final ref = FirebaseDatabase.instance.ref("users/$userId/diet");
 
     return Scaffold(
       appBar: AppBar(title: Text("Diet Plan")),
@@ -24,20 +23,20 @@ class DietScreen extends StatelessWidget {
           if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
             return const Center(child: Text("No diet plan found"));
           }
-             final raw = snapshot.data!.snapshot.value;
+          final raw = snapshot.data!.snapshot.value;
 
           List<Map<String, dynamic>> dietList = [];
 
-          // Handle Map
-            if (raw is Map) {
+          //----------handling map------------\\
+          if (raw is Map) {
             raw.forEach((key, value) {
               if (value is Map) {
                 dietList.add(Map<String, dynamic>.from(value));
               }
             });
           }
-          // Handle List
-            else if (raw is List) {
+          //-------- handle list-------------\\
+          else if (raw is List) {
             for (var value in raw) {
               if (value is Map) {
                 dietList.add(Map<String, dynamic>.from(value));
@@ -78,7 +77,7 @@ class DietScreen extends StatelessWidget {
                     leading: Icon(Icons.restaurant_menu, color: Colors.white),
                     subtitle: Text(
                       "Doctor: ${meal["doctorName"] ?? "Unknown"}\nHospital: ${meal["hospitalName"] ?? "Unknown"}",
-                          style: TextStyle(color: Colors.white70),
+                      style: TextStyle(color: Colors.white70),
                     ),
                   ),
                 ),

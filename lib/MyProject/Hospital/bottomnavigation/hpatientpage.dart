@@ -15,7 +15,7 @@ class _PatientPageState extends State<PatientPage> {
   final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
   bool isLoading = true;
 
-  /// List of user maps: {userId, name, email, phone}
+  //------------ user details maping------------------\\
   List<Map<String, dynamic>> userDetails = [];
 
   @override
@@ -24,7 +24,7 @@ class _PatientPageState extends State<PatientPage> {
     fetchConnectedUsers();
   }
 
-  /// STEP 1 → Get connected user IDs
+    //------------ connected users fetching ------------------\\
   Future<void> fetchConnectedUsers() async {
     final snapshot = await _dbRef
         .child("hospitals/${widget.hospitalId}/connectedUsers")
@@ -45,7 +45,7 @@ class _PatientPageState extends State<PatientPage> {
     await fetchUserDetails(connected.keys.toList());
   }
 
-  /// STEP 2 → Fetch full user info
+   //------------ fetching connected  user information------------------\\
   Future<void> fetchUserDetails(List<String> userIds) async {
     List<Map<String, dynamic>> tempList = [];
 
@@ -59,7 +59,7 @@ class _PatientPageState extends State<PatientPage> {
           "userId": userId,
           "name": data["name"] ?? "Unknown",
           "email": data["email"] ?? "No email",
-          "phone": data["phone"] ?? "No phone",
+        
         });
       }
     }
@@ -70,7 +70,7 @@ class _PatientPageState extends State<PatientPage> {
     });
   }
 
-  /// STEP 3 → Remove / unlink user
+    //------------ connected user  removing ------------------\\
   Future<void> removeUser(String userId) async {
     await _dbRef
         .child("hospitals/${widget.hospitalId}/connectedUsers/$userId")
@@ -174,14 +174,11 @@ class _PatientPageState extends State<PatientPage> {
                                   fontSize: 16,
                                   color: Colors.white,
                                 ),),
-                          Text("Phone: ${user["phone"]}",  style: GoogleFonts.germaniaOne(
-                                  fontSize: 16,
-                                  color: Colors.white,
-                                ),),
+                          
                         ],
                       ),
 
-                      /// DELETE USER BUTTON
+                      //------------- detete connected user----------------\\
                       trailing: IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () {

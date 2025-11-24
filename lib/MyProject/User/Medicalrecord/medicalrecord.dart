@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 class MedicalRecordPage extends StatelessWidget {
   final String userId;
 
-  const MedicalRecordPage({super.key, required this.userId,});
+  const MedicalRecordPage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,13 @@ class MedicalRecordPage extends StatelessWidget {
             fontSize: 24,
           ),
         ),
-        iconTheme: IconThemeData(color: Colors.white), // white icons
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -35,18 +41,16 @@ class MedicalRecordPage extends StatelessWidget {
           ),
         ),
       ),
-     body: StreamBuilder<DatabaseEvent>(
+      body: StreamBuilder<DatabaseEvent>(
         stream: ref.onValue,
         builder: (context, snapshot) {
           if (!snapshot.hasData || snapshot.data?.snapshot.value == null) {
-            return const Center(
-              child: Text("No medical records found"),
-            );
+            return const Center(child: Text("No medical records found"));
           }
 
           final raw = snapshot.data!.snapshot.value;
 
-          // Filter only Map entries (ignores old strings)
+          //----------Filter only Map entries-----------\\
           final recordsMap = <String, Map<String, dynamic>>{};
           if (raw is Map) {
             raw.forEach((key, value) {
@@ -56,19 +60,17 @@ class MedicalRecordPage extends StatelessWidget {
             });
           }
 
-          final records = recordsMap.entries
-              .map((entry) {
+          final records =
+              recordsMap.entries.map((entry) {
                 final rec = Map<String, dynamic>.from(entry.value);
                 rec["recordId"] = entry.key;
                 return rec;
-              })
-              .toList()
-            ..sort((a, b) => b["date"].toString().compareTo(a["date"].toString()));
+              }).toList()..sort(
+                (a, b) => b["date"].toString().compareTo(a["date"].toString()),
+              );
 
           if (records.isEmpty) {
-            return const Center(
-              child: Text("No medical records found"),
-            );
+            return const Center(child: Text("No medical records found"));
           }
 
           return ListView.builder(
@@ -89,9 +91,10 @@ class MedicalRecordPage extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
-                      colors: [Colors.blue,
-                        Color.fromARGB(255, 4, 46, 81), // Dark Blue
-                         // Light Blue
+                      colors: [
+                        Colors.blue,
+                        Color.fromARGB(255, 4, 46, 81),
+                        // Light Blue
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,

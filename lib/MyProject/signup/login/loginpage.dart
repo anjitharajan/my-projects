@@ -73,8 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                       doctorId: user.doctorId ?? '',
 
                       doctorName: user.name ?? 'Doctor',
-                      hospitalId:
-                          user.hospitalId ?? '', // <- pass hospitalId here
+                      hospitalId: user.hospitalId ?? '',
                     ),
                   ),
                 );
@@ -85,6 +84,8 @@ class _LoginPageState extends State<LoginPage> {
                     builder: (_) => Userdashboard(
                       userId: user.id ?? '',
                       userName: user.name ?? 'User',
+                    //  userEmail: user.email ?? '',
+
                     ),
                   ),
                 );
@@ -164,31 +165,19 @@ class _LoginPageState extends State<LoginPage> {
                             items: const [
                               DropdownMenuItem(
                                 value: "Admin",
-                                child: Text(
-                                  "Admin",
-                                  //style: TextStyle(color: Colors.white),
-                                ),
+                                child: Text("Admin"),
                               ),
                               DropdownMenuItem(
                                 value: "Hospital",
-                                child: Text(
-                                  "Hospital",
-                                  //  style: TextStyle(color: Colors.white),
-                                ),
+                                child: Text("Hospital"),
                               ),
                               DropdownMenuItem(
                                 value: "Doctor",
-                                child: Text(
-                                  "Doctor",
-                                  //style: TextStyle(color: Colors.white),
-                                ),
+                                child: Text("Doctor"),
                               ),
                               DropdownMenuItem(
                                 value: "User",
-                                child: Text(
-                                  "User",
-                                  //tyle: TextStyle(color: Colors.white)
-                                ),
+                                child: Text("User"),
                               ),
                             ],
                           ),
@@ -198,8 +187,8 @@ class _LoginPageState extends State<LoginPage> {
                         TextField(
                           controller: emailOrCodeController,
                           style: GoogleFonts.grenzeGotisch(
-                            fontSize: 18, //font size for input text
-                            fontWeight: FontWeight.w600, //font weight
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
                             color: Color.fromARGB(255, 4, 46, 81),
                           ),
                           decoration: InputDecoration(
@@ -214,8 +203,7 @@ class _LoginPageState extends State<LoginPage> {
                                 : "Email",
                             labelStyle: GoogleFonts.grenzeGotisch(
                               color: Color.fromARGB(255, 4, 46, 81),
-                              fontWeight:
-                                  FontWeight.w500, // font weight for label
+                              fontWeight: FontWeight.w500,
                             ),
                             filled: true,
                             fillColor: Colors.grey.shade100,

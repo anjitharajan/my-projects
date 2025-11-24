@@ -59,8 +59,8 @@ class HospitalPage extends StatelessWidget {
             ),
           ),
 
-          // Hospital header section
-         SliverToBoxAdapter(
+          //-------------------hospital  sliver header section-----------------\\
+          SliverToBoxAdapter(
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -78,7 +78,7 @@ class HospitalPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // ----- Hospital Name & About -----
+                  // ----- hospital name and about -----\\
                   Padding(
                     padding: const EdgeInsets.all(20),
                     child: Column(
@@ -106,10 +106,12 @@ class HospitalPage extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // ---------- UNLINK HOSPITAL BOX ----------
+                  // ---------- unlink hospital ----------\\
                   Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 10,
+                    ),
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -145,22 +147,22 @@ class HospitalPage extends StatelessWidget {
                             onPressed: () async {
                               final root = FirebaseDatabase.instance.ref();
 
-                              // await root
-                              //     .child("users/$userId/hospitalStatus/$hospitalId")
-                              //     .remove();
-
                               await root
                                   .child("users/$userId/currentHospitalId")
                                   .remove();
-                                    // ✅ MUST REMOVE enabled hospital link
-  await root
-      .child("users/$userId/enabledHospitals/$hospitalId")
-      .remove();
+                              //----------------must remove enabled hospital link-------------\\
+                              await root
+                                  .child(
+                                    "users/$userId/enabledHospitals/$hospitalId",
+                                  )
+                                  .remove();
 
                               Navigator.pop(context);
                             },
-                            icon:
-                                const Icon(Icons.link_off, color: Colors.white),
+                            icon: const Icon(
+                              Icons.link_off,
+                              color: Colors.white,
+                            ),
                             label: const Text(
                               "Unlink Hospital",
                               style: TextStyle(color: Colors.white),
@@ -187,7 +189,7 @@ class HospitalPage extends StatelessWidget {
             ),
           ),
 
-          // ------------------------ SERVICES GRID ------------------------
+          // ------------------------service modules ------------------------\\
           SliverPadding(
             padding: const EdgeInsets.all(16),
             sliver: SliverGrid(
@@ -197,120 +199,120 @@ class HospitalPage extends StatelessWidget {
                 crossAxisSpacing: 12,
                 childAspectRatio: 1,
               ),
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final service = services[index];
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final service = services[index];
 
-                  return GestureDetector(
-                    onTap: () {
-                      switch (service["name"]) {
-                        case "Rooms":
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (_) => RoomScreen(userId: userId)),
-                          );
-                          break;
+                return GestureDetector(
+                  onTap: () {
+                    switch (service["name"]) {
+                      case "Rooms":
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => RoomScreen(userId: userId),
+                          ),
+                        );
+                        break;
 
-                        case "Diet":
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  DietScreen(userId: userId, hospitalId: hospitalId),
+                      case "Diet":
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DietScreen(
+                              userId: userId,
+                              hospitalId: hospitalId,
                             ),
-                          );
-                          break;
+                          ),
+                        );
+                        break;
 
-                        case "Report":
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => UserReportScreen(
-                                userId: userId,
-                                hospitalId: hospitalId,
-                                hospitalName: hospitalName,
-                              ),
+                      case "Report":
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => UserReportScreen(
+                              userId: userId,
+                              hospitalId: hospitalId,
+                              hospitalName: hospitalName,
                             ),
-                          );
-                          break;
+                          ),
+                        );
+                        break;
 
-                        case "Request":
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => RequestScreen(
-                                hospitalId: hospitalId,
-                                userId: userId,
-                              ),
+                      case "Request":
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => RequestScreen(
+                              hospitalId: hospitalId,
+                              userId: userId,
                             ),
-                          );
-                          break;
+                          ),
+                        );
+                        break;
 
-                        case "Map":
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => UserMapScreen(hospitalId: hospitalId),
-                            ),
-                          );
-                          break;
+                      case "Map":
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                UserMapScreen(hospitalId: hospitalId),
+                          ),
+                        );
+                        break;
 
-                        case "Emergency":
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => EmergencyScreen(
-                                hospitalId: hospitalId,
-                                userId: userId,
-                              ),
+                      case "Emergency":
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EmergencyScreen(
+                              hospitalId: hospitalId,
+                              userId: userId,
                             ),
-                          );
-                          break;
-                      }
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        gradient: const LinearGradient(
-                          colors: [
-                            Colors.blueAccent,
-                            Color.fromARGB(255, 4, 46, 81),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
+                          ),
+                        );
+                        break;
+                    }
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: const LinearGradient(
+                        colors: [
+                          Colors.blueAccent,
+                          Color.fromARGB(255, 4, 46, 81),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 4,
+                          offset: Offset(2, 3),
                         ),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(2, 3),
+                      ],
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(service["icon"], color: Colors.white, size: 35),
+                          const SizedBox(height: 8),
+                          Text(
+                            service["name"],
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                         ],
                       ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(service["icon"],
-                                color: Colors.white, size: 35),
-                            const SizedBox(height: 8),
-                            Text(
-                              service["name"],
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
-                  );
-                },
-                childCount: services.length,
-              ),
+                  ),
+                );
+              }, childCount: services.length),
             ),
           ),
         ],

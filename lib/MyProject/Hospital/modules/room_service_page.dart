@@ -20,228 +20,223 @@ class _HospitalRoomPageState extends State<HospitalRoomPage> {
   List<Map<String, dynamic>> enabledUsers = [];
   bool loading = true;
 
-@override
-void initState() {
-  super.initState();
-  initLoad();
-}
+  @override
+  void initState() {
+    super.initState();
+    initLoad();
+  }
 
-Future<void> initLoad() async {
-  await loadRooms();
-  await loadEnabledUsers();
-  setState(() => loading = false);
-}
+  Future<void> initLoad() async {
+    await loadRooms();
+    await loadEnabledUsers();
+    setState(() => loading = false);
+  }
 
-  // ---------------- LOAD ROOMS ----------------\\
-Future<void> loadRooms() async {
-  final snap =
-      await db.child("hospitals/${widget.hospitalId}/rooms").get();
+  // ---------------- load rooms----------------\\
+  Future<void> loadRooms() async {
+    final snap = await db.child("hospitals/${widget.hospitalId}/rooms").get();
 
-  rooms.clear();
+    rooms.clear();
 
-  if (snap.exists) {
-    for (var child in snap.children) {
-      final value = child.value;
+    if (snap.exists) {
+      for (var child in snap.children) {
+        final value = child.value;
 
-      if (value is Map) {
-        final data = Map<String, dynamic>.from(value);
-        rooms.add(data);
+        if (value is Map) {
+          final data = Map<String, dynamic>.from(value);
+          rooms.add(data);
+        }
       }
-      // If it's bool or something else, skip it
-    }
-  }
-}
-
-  // ---------------- LOAD ENABLED USERS ----------------\\
-Future<void> loadEnabledUsers() async {
-  final snap = await db
-      .child("hospitals/${widget.hospitalId}/connectedUsers")
-      .get();
-
-  enabledUsers.clear();
-
-  if (snap.exists) {
-    for (var child in snap.children) {
-      String userId = child.key!;
-
-      // ✅ Fetch from actual user node
-      final userData =
-          await db.child("users/$userId").get();
-
-      String name = userData.child("name").value?.toString() ?? "Unknown User";
-
-      final userSnap = await db.child("users/$userId/allocatedRoom").get();
-
-      enabledUsers.add({
-        "userId": userId,
-        "name": name,
-        "hasRoom": userSnap.exists,
-      });
     }
   }
 
-  setState(() {});
-}
-
-  // ---------------- ADD ROOM ----------------\\
- Future<void> addRoom() async {
-  if (roomController.text.trim().isEmpty) return;
-
-  String roomId = const Uuid().v4();
-
-  final roomData = {
-    "roomId": roomId,
-    "roomNumber": roomController.text.trim(),
-    "status": "available",
-    "allocatedTo": "",
-  };
-
-  // ✔ Save ONLY inside hospital node
-  await db.child("hospitals/${widget.hospitalId}/rooms/$roomId").set(roomData);
-
-  roomController.clear();
-  await loadRooms();
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("Room added successfully")),
-  );
-}
-
-  // ---------------- ALLOCATE ROOM --------------\\
-Future<void> allocateRoom(String roomId, String roomNumber) async {
-  // STEP 1 — Select user
-  String? userId = await showDialog(
-  context: context,
-  builder: (context) => AlertDialog(
-    title: const Text("Allocate Room To"),
-
-    content: SizedBox(
-      width: 300,               
-      height: 300,             
-      child: enabledUsers.isEmpty
-          ? const Center(
-              child: Text("No eligible users available"),
-            )
-          : ListView.builder(
-              shrinkWrap: true, // ✅ FIX: Prevent size issues
-              itemCount: enabledUsers.length,
-              itemBuilder: (context, index) {
-                final u = enabledUsers[index];
-
-                return ListTile(
-                  title: Text(u["name"]),
-                  subtitle: u["hasRoom"]
-                      ? const Text(
-                          "Already has a room",
-                          style: TextStyle(color: Colors.red),
-                        )
-                      : null,
-                  onTap: u["hasRoom"]
-                      ? null
-                      : () => Navigator.pop(context, u["userId"]),
-                );
-              },
-            ),
-    ),
-
-    actions: [
-      TextButton(
-        onPressed: () => Navigator.pop(context),
-        child: const Text("Cancel"),
-      )
-    ],
-  ),
-);
-if (userId == null) return; 
-
-
-  // STEP 2 — Show loading barrier
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => const Center(child: CircularProgressIndicator()),
-  );
-
-  try {
-    // Ensure room exists
+  // ---------------- load enabled users ----------------\\
+  Future<void> loadEnabledUsers() async {
     final snap = await db
-        .child("hospitals/${widget.hospitalId}/rooms/$roomId")
-        .get()
-        .timeout(const Duration(seconds: 5));
+        .child("hospitals/${widget.hospitalId}/connectedUsers")
+        .get();
 
-    if (!snap.exists) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Room not found in hospital")),
-      );
-      return;
+    enabledUsers.clear();
+
+    if (snap.exists) {
+      for (var child in snap.children) {
+        String userId = child.key!;
+
+        //---------------- Fetch from actual user node--------------------\\
+        final userData = await db.child("users/$userId").get();
+
+        String name =
+            userData.child("name").value?.toString() ?? "Unknown User";
+
+        final userSnap = await db.child("users/$userId/allocatedRoom").get();
+
+        enabledUsers.add({
+          "userId": userId,
+          "name": name,
+          "hasRoom": userSnap.exists,
+        });
+      }
     }
-// FETCH USER NAME
-final userSnap = await db.child("users/$userId/name").get();
-String userName = userSnap.value?.toString() ?? "Unknown";
 
-    // UPDATE ROOM
-  await db
-    .child("hospitals/${widget.hospitalId}/rooms/$roomId")
-    .update({
-  "status": "occupied",
-  "allocatedToId": userId,
-  "allocatedToName": userName,
-});
+    setState(() {});
+  }
 
+  // ---------------- add room ----------------\\
+  Future<void> addRoom() async {
+    if (roomController.text.trim().isEmpty) return;
 
-    // MIRROR TO USER
-    await db.child("users/$userId/allocatedRoom").set({
-      "hospitalId": widget.hospitalId,
+    String roomId = const Uuid().v4();
+
+    final roomData = {
       "roomId": roomId,
-      "roomNumber": roomNumber,
-      "allocatedAt": DateTime.now().toIso8601String(),
+      "roomNumber": roomController.text.trim(),
+      "status": "available",
+      "allocatedTo": "",
+    };
+
+    //-------------------Save ONLY inside hospital node--------------------------\\
+    await db
+        .child("hospitals/${widget.hospitalId}/rooms/$roomId")
+        .set(roomData);
+
+    roomController.clear();
+    await loadRooms();
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Room added successfully")));
+  }
+
+  // ----------------allocate rooms to users --------------\\
+  Future<void> allocateRoom(String roomId, String roomNumber) async {
+    //---------------- Select user------------------\\
+    String? userId = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Allocate Room To"),
+
+        content: SizedBox(
+          width: 300,
+          height: 300,
+          child: enabledUsers.isEmpty
+              ? const Center(child: Text("No eligible users available"))
+              : ListView.builder(
+                  shrinkWrap:
+                      true, //<<<<<---------- Prevent size issues------------\\
+                  itemCount: enabledUsers.length,
+                  itemBuilder: (context, index) {
+                    final u = enabledUsers[index];
+
+                    return ListTile(
+                      title: Text(u["name"]),
+                      subtitle: u["hasRoom"]
+                          ? const Text(
+                              "Already has a room",
+                              style: TextStyle(color: Colors.red),
+                            )
+                          : null,
+                      onTap: u["hasRoom"]
+                          ? null
+                          : () => Navigator.pop(context, u["userId"]),
+                    );
+                  },
+                ),
+        ),
+
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+        ],
+      ),
+    );
+    if (userId == null) return;
+
+    showDialog(
+      context:
+          context, //<<<<------------Show loading barrier-----------------\\
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      //-------------Ensure room exists-------------\\
+      final snap = await db
+          .child("hospitals/${widget.hospitalId}/rooms/$roomId")
+          .get()
+          .timeout(const Duration(seconds: 5));
+
+      if (!snap.exists) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Room not found in hospital")),
+        );
+        return;
+      }
+      //--------------- fetching user name-------------------------\\
+      final userSnap = await db.child("users/$userId/name").get();
+      String userName = userSnap.value?.toString() ?? "Unknown";
+
+      //-------------------- room update-------------------------\\
+      await db.child("hospitals/${widget.hospitalId}/rooms/$roomId").update({
+        "status": "occupied",
+        "allocatedToId": userId,
+        "allocatedToName": userName,
+      });
+
+      //--------------------- in to the user/ allocated node-------------------\\
+      await db.child("users/$userId/allocatedRoom").set({
+        "hospitalId": widget.hospitalId,
+        "roomId": roomId,
+        "roomNumber": roomNumber,
+        "allocatedAt": DateTime.now().toIso8601String(),
+      });
+
+      Navigator.pop(context); //<<<------------ close loading----------\\
+
+      await loadRooms();
+      await loadEnabledUsers();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Room allocated successfully")),
+      );
+    } catch (e) {
+      Navigator.pop(
+        context,
+      ); //<<<<<<<----------------- ensure always closing-----------\\
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+    }
+  }
+
+  // ---------------- room deallocation----------------\\
+  Future<void> deallocateRoom(String roomId, String userId) async {
+    //-------------Update room inside hospital node/room-----------\\
+    await db.child("hospitals/${widget.hospitalId}/rooms/$roomId").update({
+      "status": "available",
+      "allocatedTo": "",
     });
 
-    Navigator.pop(context); // CLOSE LOADING
+    //---------------Remove from user side/allocated room-------------\\
+    if (userId.isNotEmpty) {
+      await db.child("users/$userId/allocatedRoom").remove();
+    }
 
     await loadRooms();
     await loadEnabledUsers();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Room allocated successfully")),
-    );
-  } catch (e) {
-    Navigator.pop(context); // ENSURE ALWAYS CLOSES
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Error: $e")),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text("Room deallocated")));
   }
-}
 
-
-
-  // ---------------- DEALLOCATE ROOM ----------------\\
-Future<void> deallocateRoom(String roomId, String userId) async {
-  // ✔ Update room inside hospital node
-  await db.child("hospitals/${widget.hospitalId}/rooms/$roomId").update({
-    "status": "available",
-    "allocatedTo": "",
-  });
-
-  // ✔ Remove from user side
-if (userId.isNotEmpty) {
-  await db.child("users/$userId/allocatedRoom").remove();
-}
-
-  await loadRooms();
-  await loadEnabledUsers();
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("Room deallocated")));
-}
-
-
-  // ---------------- UI BUILDER ----------------\\
+  // ---------------- ui design ----------------\\
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-          appBar: AppBar(
+      appBar: AppBar(
         title: Text(
           "Hospital Rooms",
           style: GoogleFonts.merriweather(
@@ -268,74 +263,75 @@ if (userId.isNotEmpty) {
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
+              padding: const EdgeInsets.all(16),
+              child: Column(
                 children: [
-                  // ADD ROOM TEXTFIELD
+                  //-----------------add room text field-----------------------\\
                   Container(
-                     padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [
-                      Colors.blue,
-                      Color.fromARGB(255, 4, 46, 81),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 10,
-                      offset: Offset(0, 4),
-                    )
-                  ],
-                ),
-                      child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: roomController,
-                        style: const TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          labelText: "Room Number",
-                          labelStyle: GoogleFonts.dmSerifDisplay(
-                            fontSize: 19,
-                            color: Colors.white70),
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(0.1),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Colors.blue, Color.fromARGB(255, 4, 46, 81)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 10,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: roomController,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                              labelText: "Room Number",
+                              labelStyle: GoogleFonts.dmSerifDisplay(
+                                fontSize: 19,
+                                color: Colors.white70,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white.withOpacity(0.1),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         ElevatedButton(
                           onPressed: addRoom,
                           style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: Color.fromARGB(255, 4, 46, 81),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                          child:  Text("Add",
-                             style: GoogleFonts.germaniaOne(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Color.fromARGB(255, 4, 46, 81),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 14,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            "Add",
+                            style: GoogleFonts.germaniaOne(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold),),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ),
-            const SizedBox(height: 20),
-                  // ROOM LIST
+                  const SizedBox(height: 20),
+                  //----------------------- room list-----------------------\\
                   Expanded(
                     child: ListView.builder(
                       itemCount: rooms.length,
@@ -343,97 +339,104 @@ if (userId.isNotEmpty) {
                         final room = rooms[index];
                         bool isAvailable = room["status"] == "available";
                         String allocatedUser = room["allocatedTo"] ?? "";
-            
-                       return Container(
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Colors.blue,
-                            Color.fromARGB(255, 4, 46, 81),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 8,
-                            offset: Offset(0, 4),
-                          )
-                        ],
-                      ),
-                      child: ListTile(
-                        contentPadding: const EdgeInsets.all(16),
 
-                        title: Text(
-                          "Room No: ${room["roomNumber"]}",
-                          style: GoogleFonts.dmSerifDisplay(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            fontSize: 18,
-                          ),
-                        ),
-
-                        subtitle: Padding(
-                          padding: const EdgeInsets.only(top: 5),
-                          child: Text(
-                            "Status : ${room["status"]}\n"
-                            "Allocated To : ${room["allocatedToName"] ?? "None"}",
-                            style: GoogleFonts.neuton(
-                              color: Colors.white70,
-                              fontSize: 18,
-                              height: 1.4,
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Colors.blue,
+                                Color.fromARGB(255, 4, 46, 81),
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
                             ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 8,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
                           ),
-                        ),
-                              trailing: isAvailable
-                                  ? ElevatedButton(
-                                      onPressed: () => allocateRoom(
-                                        room["roomId"],
-                                        room["roomNumber"],
-                                      ),
-                                         style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  foregroundColor:
-                                      Color.fromARGB(255, 4, 46, 81),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.all(16),
+
+                            title: Text(
+                              "Room No: ${room["roomNumber"]}",
+                              style: GoogleFonts.dmSerifDisplay(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                fontSize: 18,
+                              ),
+                            ),
+
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 5),
+                              child: Text(
+                                "Status : ${room["status"]}\n"
+                                "Allocated To : ${room["allocatedToName"] ?? "None"}",
+                                style: GoogleFonts.neuton(
+                                  color: Colors.white70,
+                                  fontSize: 18,
+                                  height: 1.4,
                                 ),
-                                      child:  Text("Allocate",
+                              ),
+                            ),
+                            trailing: isAvailable
+                                ? ElevatedButton(
+                                    onPressed: () => allocateRoom(
+                                      room["roomId"],
+                                      room["roomNumber"],
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.white,
+                                      foregroundColor: Color.fromARGB(
+                                        255,
+                                        4,
+                                        46,
+                                        81,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                    ),
+                                    child: Text(
+                                      "Allocate",
                                       style: GoogleFonts.germaniaOne(
                                         fontSize: 16,
-                                        fontWeight: FontWeight.bold
+                                        fontWeight: FontWeight.bold,
                                       ),
-                                    ))
-                                  : ElevatedButton(
-                                     
-                                      onPressed: () => deallocateRoom(
-                                        room["roomId"],
-                                        allocatedUser,
+                                    ),
+                                  )
+                                : ElevatedButton(
+                                    onPressed: () => deallocateRoom(
+                                      room["roomId"],
+                                      allocatedUser,
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.redAccent,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                        style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.redAccent,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Text(
+                                      "Free Room",
+                                      style: GoogleFonts.germaniaOne(
+                                        fontSize: 16,
+                                      ),
+                                    ),
                                   ),
-                                ),
-                                      child:  Text("Free Room",
-                                        style: GoogleFonts.germaniaOne(
-                                        fontSize: 16
-                                      ),),
-                                  ),
-                      ),
-                    );
-                  },
-                ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-);
+            ),
+    );
   }
 }

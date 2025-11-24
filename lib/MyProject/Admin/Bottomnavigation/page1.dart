@@ -23,7 +23,6 @@ class _Page1State extends State<page1> {
     if (_formKey.currentState!.validate()) {
       final newHospital = dbRef.push();
 
-      // 🔹 Auto-generated hospital code
       final autoCode =
           "HOSP${DateTime.now().millisecondsSinceEpoch.toString().substring(6)}";
 
@@ -32,10 +31,10 @@ class _Page1State extends State<page1> {
         "name": hospitalName.text.trim(),
         "address": hospitalAddress.text.trim(),
         "contact": hospitalContact.text.trim(),
-        "code": autoCode, // auto-generated code
-        "email": "", // will be filled during hospital signup
+        "code": autoCode,
+        "email": "",
         "password": "",
-        "linked": false, // will be true when hospital signs up
+        "linked": false,
         "createdAt": DateTime.now().toIso8601String(),
       });
 
@@ -45,7 +44,6 @@ class _Page1State extends State<page1> {
         ),
       );
 
-      // Clear form fields
       hospitalName.clear();
       hospitalAddress.clear();
       hospitalContact.clear();
@@ -65,10 +63,10 @@ class _Page1State extends State<page1> {
             children: [
               Text(
                 "Add New Hospital",
-                style:  GoogleFonts.merriweather(
+                style: GoogleFonts.merriweather(
                   fontSize: 26,
                   fontWeight: FontWeight.bold,
-                  color: Color.fromARGB(255, 6, 33, 55)
+                  color: Color.fromARGB(255, 6, 33, 55),
                 ),
               ),
               SizedBox(height: 24),
@@ -91,37 +89,69 @@ class _Page1State extends State<page1> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: buildTextFormField(
-                            "Hospital Name",
-                            hospitalName,
-                            "Enter hospital name",
-                          ),
-                        ),
-                        SizedBox(width: 20),
-                        Expanded(
-                          child: buildTextFormField(
-                            "Hospital Address",
-                            hospitalAddress,
-                            "Enter hospital address",
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16),
+                    // 🔹 UPDATED: Responsive hospital name & address fields
+                    LayoutBuilder(
+                      builder: (context, constraints) {
+                        if (constraints.maxWidth < 600) {
+                          // Mobile → stack vertically
+                          return Column(
+                            children: [
+                              buildTextFormField(
+                                "Hospital Name",
+                                hospitalName,
+                                "Enter hospital name",
+                              ),
+                              const SizedBox(height: 16),
+                              buildTextFormField(
+                                "Hospital Address",
+                                hospitalAddress,
+                                "Enter hospital address",
+                              ),
+                              const SizedBox(height: 16),
 
-                    // Row 2
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 100, right: 100),
-                        child: buildTextFormField(
-                          "Hospital Contact",
-                          hospitalContact,
-                          "Enter hospital contact",
-                        ),
-                      ),
+                              // ⭐ ADDED → CONTACT FIELD (MOBILE)
+                              buildTextFormField(
+                                "Hospital Contact",
+                                hospitalContact,
+                                "Enter hospital contact",
+                              ),
+                            ],
+                          );
+                        } else {
+                          // Desktop → side by side
+                          return Column(
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: buildTextFormField(
+                                      "Hospital Name",
+                                      hospitalName,
+                                      "Enter hospital name",
+                                    ),
+                                  ),
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: buildTextFormField(
+                                      "Hospital Address",
+                                      hospitalAddress,
+                                      "Enter hospital address",
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 20),
+
+                              // ⭐ ADDED → CONTACT FIELD (DESKTOP)
+                              buildTextFormField(
+                                "Hospital Contact",
+                                hospitalContact,
+                                "Enter hospital contact",
+                              ),
+                            ],
+                          );
+                        }
+                      },
                     ),
 
                     SizedBox(height: 20),
@@ -131,8 +161,10 @@ class _Page1State extends State<page1> {
                       child: ElevatedButton.icon(
                         onPressed: addHospital,
                         icon: Icon(Icons.save, size: 24),
-                        label: Text("Save", style: GoogleFonts.germaniaOne(
-                          fontSize: 18)),
+                        label: Text(
+                          "Save",
+                          style: GoogleFonts.germaniaOne(fontSize: 18),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.white,
                           foregroundColor: Color.fromARGB(255, 4, 46, 81),
@@ -163,12 +195,11 @@ class _Page1State extends State<page1> {
     String? validationText,
   ) {
     return Padding(
-      padding: EdgeInsets.all(8.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextFormField(
         controller: controller,
         validator: (val) => val == null || val.isEmpty ? validationText : null,
-        style:  GoogleFonts.germaniaOne(
-          color: Colors.white, fontSize: 16),
+        style: GoogleFonts.germaniaOne(color: Colors.white, fontSize: 16),
         decoration: InputDecoration(
           labelText: label,
           labelStyle: GoogleFonts.ibarraRealNova(
